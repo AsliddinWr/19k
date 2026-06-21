@@ -50,6 +50,30 @@ function delay(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+const hexLoaderCells = [
+  ['center-gel', ''],
+  ['c1', 'r1'], ['c2', 'r1'], ['c3', 'r1'], ['c4', 'r1'], ['c5', 'r1'], ['c6', 'r1'],
+  ['c7', 'r2'], ['c8', 'r2'], ['c9', 'r2'], ['c10', 'r2'], ['c11', 'r2'], ['c12', 'r2'], ['c13', 'r2'], ['c14', 'r2'], ['c15', 'r2'], ['c16', 'r2'], ['c17', 'r2'], ['c18', 'r2'],
+  ['c19', 'r3'], ['c20', 'r3'], ['c21', 'r3'], ['c22', 'r3'], ['c23', 'r3'], ['c24', 'r3'], ['c25', 'r3'], ['c26', 'r3'], ['c28', 'r3'], ['c29', 'r3'], ['c30', 'r3'], ['c31', 'r3'], ['c32', 'r3'], ['c33', 'r3'], ['c34', 'r3'], ['c35', 'r3'], ['c36', 'r3'], ['c37', 'r3'],
+];
+
+function HexLoader({ size = 'normal' }) {
+  return (
+    <div className={`casino-hex-loader ${size === 'small' ? 'is-small' : ''}`} aria-hidden="true">
+      <div className="hex-glow" />
+      <div className="socket">
+        {hexLoaderCells.map(([cell, ring], index) => (
+          <div key={`${cell}-${index}`} className={`gel ${cell} ${ring}`.trim()}>
+            <div className="hex-brick h1" />
+            <div className="hex-brick h2" />
+            <div className="hex-brick h3" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WebAppClient() {
   const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Case Arena';
 
@@ -372,10 +396,13 @@ export default function WebAppClient() {
   if (loading) {
     return (
       <main className="center-screen casino-bg">
-        <div className="loader-card premium-card">
-          <div className="orb-loader" />
-          <h2>Casino Arena yuklanmoqda</h2>
-          <p>Telegram autentifikatsiya va Supabase ma’lumotlari tekshirilmoqda.</p>
+        <div className="loader-card premium-card hex-loader-card">
+          <HexLoader />
+          <div className="loader-copy">
+            <span className="eyebrow">Secure WebApp</span>
+            <h2>Casino Arena yuklanmoqda</h2>
+            <p>Telegram sessiya va Supabase ma’lumotlari tekshirilmoqda.</p>
+          </div>
         </div>
       </main>
     );
@@ -385,6 +412,12 @@ export default function WebAppClient() {
     <main className="casino-bg app-frame">
       {toast ? <div className="toast">{toast}</div> : null}
       {error ? <div className="global-alert">{error}</div> : null}
+      {busy ? (
+        <div className="busy-indicator premium-card">
+          <HexLoader size="small" />
+          <span>Amal bajarilmoqda...</span>
+        </div>
+      ) : null}
 
       <aside className="desktop-rail premium-card">
         <Brand appName={appName} />
