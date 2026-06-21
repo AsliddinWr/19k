@@ -197,6 +197,220 @@ h3 {
   to { transform: rotate(360deg); }
 }
 
+
+/* Premium hex loader adapted from Uiverse.io by PhyoTP and redesigned for Case Arena */
+.hex-loader-card {
+  width: min(92vw, 480px);
+  min-height: 430px;
+  display: grid;
+  place-items: center;
+  gap: 22px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hex-loader-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -26% -42% -26%;
+  height: 62%;
+  z-index: 0;
+  background:
+    radial-gradient(circle, rgba(248, 199, 90, 0.26), transparent 58%),
+    radial-gradient(circle at 72% 34%, rgba(33, 212, 253, 0.2), transparent 42%);
+  filter: blur(20px);
+}
+
+.loader-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.loader-copy .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 199, 90, 0.24);
+  background: rgba(248, 199, 90, 0.08);
+  color: #ffe7a6;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.casino-hex-loader {
+  --hex-main: #ff8a00;
+  --hex-hot: #ff4d00;
+  --hex-gold: #f8c75a;
+  --hex-cyan: #21d4fd;
+  width: 220px;
+  height: 220px;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 22px rgba(255, 138, 0, 0.42));
+}
+
+.casino-hex-loader.is-small {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  filter: drop-shadow(0 0 12px rgba(255, 138, 0, 0.45));
+}
+
+.casino-hex-loader .hex-glow {
+  position: absolute;
+  inset: 15%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(248, 199, 90, 0.22), transparent 58%),
+    conic-gradient(from 90deg, rgba(33, 212, 253, 0.1), rgba(159, 98, 255, 0.16), rgba(255, 138, 0, 0.18), rgba(33, 212, 253, 0.1));
+  filter: blur(10px);
+  animation: hexGlowSpin 3.4s linear infinite;
+}
+
+.casino-hex-loader .socket {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  transform-origin: center;
+}
+
+.casino-hex-loader.is-small .socket {
+  transform: scale(0.22);
+}
+
+.casino-hex-loader .hex-brick {
+  background: linear-gradient(90deg, var(--hex-hot), var(--hex-gold));
+  width: 30px;
+  height: 17px;
+  position: absolute;
+  top: 5px;
+  border-radius: 3px;
+  box-shadow:
+    0 0 10px rgba(255, 94, 14, 0.48),
+    inset 0 0 7px rgba(255, 255, 255, 0.18);
+  animation: hexFade 2s infinite ease-in-out;
+}
+
+.casino-hex-loader .h2 { transform: rotate(60deg); }
+.casino-hex-loader .h3 { transform: rotate(-60deg); }
+
+.casino-hex-loader .gel {
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transition: all 0.3s;
+}
+
+.casino-hex-loader .center-gel {
+  margin-left: -15px;
+  margin-top: -15px;
+  animation: hexPulse 2s infinite ease-in-out;
+}
+
+.casino-hex-loader .c1 { margin-left: -47px; margin-top: -15px; }
+.casino-hex-loader .c2 { margin-left: -31px; margin-top: -43px; }
+.casino-hex-loader .c3 { margin-left: 1px; margin-top: -43px; }
+.casino-hex-loader .c4 { margin-left: 17px; margin-top: -15px; }
+.casino-hex-loader .c5 { margin-left: -31px; margin-top: 13px; }
+.casino-hex-loader .c6 { margin-left: 1px; margin-top: 13px; }
+.casino-hex-loader .c7 { margin-left: -63px; margin-top: -43px; }
+.casino-hex-loader .c8 { margin-left: 33px; margin-top: -43px; }
+.casino-hex-loader .c9 { margin-left: -15px; margin-top: 41px; }
+.casino-hex-loader .c10 { margin-left: -63px; margin-top: 13px; }
+.casino-hex-loader .c11 { margin-left: 33px; margin-top: 13px; }
+.casino-hex-loader .c12 { margin-left: -15px; margin-top: -71px; }
+.casino-hex-loader .c13 { margin-left: -47px; margin-top: -71px; }
+.casino-hex-loader .c14 { margin-left: 17px; margin-top: -71px; }
+.casino-hex-loader .c15 { margin-left: -47px; margin-top: 41px; }
+.casino-hex-loader .c16 { margin-left: 17px; margin-top: 41px; }
+.casino-hex-loader .c17 { margin-left: -79px; margin-top: -15px; }
+.casino-hex-loader .c18 { margin-left: 49px; margin-top: -15px; }
+.casino-hex-loader .c19 { margin-left: -63px; margin-top: -99px; }
+.casino-hex-loader .c20 { margin-left: 33px; margin-top: -99px; }
+.casino-hex-loader .c21 { margin-left: 1px; margin-top: -99px; }
+.casino-hex-loader .c22 { margin-left: -31px; margin-top: -99px; }
+.casino-hex-loader .c23 { margin-left: -63px; margin-top: 69px; }
+.casino-hex-loader .c24 { margin-left: 33px; margin-top: 69px; }
+.casino-hex-loader .c25 { margin-left: 1px; margin-top: 69px; }
+.casino-hex-loader .c26 { margin-left: -31px; margin-top: 69px; }
+.casino-hex-loader .c28 { margin-left: -95px; margin-top: -43px; }
+.casino-hex-loader .c29 { margin-left: -95px; margin-top: 13px; }
+.casino-hex-loader .c30 { margin-left: 49px; margin-top: 41px; }
+.casino-hex-loader .c31 { margin-left: -79px; margin-top: -71px; }
+.casino-hex-loader .c32 { margin-left: -111px; margin-top: -15px; }
+.casino-hex-loader .c33 { margin-left: 65px; margin-top: -43px; }
+.casino-hex-loader .c34 { margin-left: 65px; margin-top: 13px; }
+.casino-hex-loader .c35 { margin-left: -79px; margin-top: 41px; }
+.casino-hex-loader .c36 { margin-left: 49px; margin-top: -71px; }
+.casino-hex-loader .c37 { margin-left: 81px; margin-top: -15px; }
+
+.casino-hex-loader .r1 { animation: hexPulse 2s infinite ease-in-out 0.2s; }
+.casino-hex-loader .r2 { animation: hexPulse 2s infinite ease-in-out 0.4s; }
+.casino-hex-loader .r3 { animation: hexPulse 2s infinite ease-in-out 0.6s; }
+
+.casino-hex-loader .r1 > .hex-brick { animation-delay: 0.2s; }
+.casino-hex-loader .r2 > .hex-brick { animation-delay: 0.4s; }
+.casino-hex-loader .r3 > .hex-brick { animation-delay: 0.6s; }
+
+.busy-indicator {
+  position: fixed;
+  z-index: 92;
+  right: 18px;
+  top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px 9px 9px;
+  border-radius: 999px;
+  color: #fff3d2;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+}
+
+@keyframes hexPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.01); opacity: 0.55; }
+}
+
+@keyframes hexFade {
+  0%, 100% { filter: brightness(1.2) saturate(1.1); background: linear-gradient(90deg, #ff8a00, #f8c75a); }
+  50% { filter: brightness(0.86) saturate(1.35); background: linear-gradient(90deg, #ff4d00, #ff8a00); }
+}
+
+@keyframes hexGlowSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .hex-loader-card {
+    min-height: 390px;
+    padding: 28px 20px;
+  }
+
+  .casino-hex-loader {
+    transform: scale(0.88);
+  }
+
+  .busy-indicator {
+    left: 50%;
+    right: auto;
+    top: 14px;
+    transform: translateX(-50%);
+  }
+}
+
 .toast,
 .global-alert {
   position: fixed;
