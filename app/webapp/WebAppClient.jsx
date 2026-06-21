@@ -50,26 +50,64 @@ function delay(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-const hexLoaderCells = [
-  ['center-gel', ''],
-  ['c1', 'r1'], ['c2', 'r1'], ['c3', 'r1'], ['c4', 'r1'], ['c5', 'r1'], ['c6', 'r1'],
-  ['c7', 'r2'], ['c8', 'r2'], ['c9', 'r2'], ['c10', 'r2'], ['c11', 'r2'], ['c12', 'r2'], ['c13', 'r2'], ['c14', 'r2'], ['c15', 'r2'], ['c16', 'r2'], ['c17', 'r2'], ['c18', 'r2'],
-  ['c19', 'r3'], ['c20', 'r3'], ['c21', 'r3'], ['c22', 'r3'], ['c23', 'r3'], ['c24', 'r3'], ['c25', 'r3'], ['c26', 'r3'], ['c28', 'r3'], ['c29', 'r3'], ['c30', 'r3'], ['c31', 'r3'], ['c32', 'r3'], ['c33', 'r3'], ['c34', 'r3'], ['c35', 'r3'], ['c36', 'r3'], ['c37', 'r3'],
+const HEX_CELLS = [
+  ['center', 0, 0, 0],
+  ['r1', -32, 0, 0.15],
+  ['r1', -16, -28, 0.15],
+  ['r1', 16, -28, 0.15],
+  ['r1', 32, 0, 0.15],
+  ['r1', -16, 28, 0.15],
+  ['r1', 16, 28, 0.15],
+  ['r2', -64, 0, 0.3],
+  ['r2', -48, -28, 0.3],
+  ['r2', -32, -56, 0.3],
+  ['r2', 0, -56, 0.3],
+  ['r2', 32, -56, 0.3],
+  ['r2', 48, -28, 0.3],
+  ['r2', 64, 0, 0.3],
+  ['r2', 48, 28, 0.3],
+  ['r2', 32, 56, 0.3],
+  ['r2', 0, 56, 0.3],
+  ['r2', -32, 56, 0.3],
+  ['r2', -48, 28, 0.3],
+  ['r3', -96, 0, 0.45],
+  ['r3', -80, -28, 0.45],
+  ['r3', -64, -56, 0.45],
+  ['r3', -48, -84, 0.45],
+  ['r3', -16, -84, 0.45],
+  ['r3', 16, -84, 0.45],
+  ['r3', 48, -84, 0.45],
+  ['r3', 64, -56, 0.45],
+  ['r3', 80, -28, 0.45],
+  ['r3', 96, 0, 0.45],
+  ['r3', 80, 28, 0.45],
+  ['r3', 64, 56, 0.45],
+  ['r3', 48, 84, 0.45],
+  ['r3', 16, 84, 0.45],
+  ['r3', -16, 84, 0.45],
+  ['r3', -48, 84, 0.45],
+  ['r3', -64, 56, 0.45],
+  ['r3', -80, 28, 0.45],
 ];
 
 function HexLoader({ size = 'normal' }) {
   return (
-    <div className={`casino-hex-loader ${size === 'small' ? 'is-small' : ''}`} aria-hidden="true">
-      <div className="hex-glow" />
-      <div className="socket">
-        {hexLoaderCells.map(([cell, ring], index) => (
-          <div key={`${cell}-${index}`} className={`gel ${cell} ${ring}`.trim()}>
-            <div className="hex-brick h1" />
-            <div className="hex-brick h2" />
-            <div className="hex-brick h3" />
-          </div>
-        ))}
-      </div>
+    <div className={`casino-hex-loader ${size === 'small' ? 'is-small' : ''}`} aria-label="Loading">
+      {HEX_CELLS.map(([ring, x, y, delay], index) => (
+        <div
+          key={index}
+          className={`casino-hex-cell ${ring}`}
+          style={{
+            '--x': `${x}px`,
+            '--y': `${y}px`,
+            '--delay': `${delay}s`,
+          }}
+        >
+          <span />
+          <span />
+          <span />
+        </div>
+      ))}
     </div>
   );
 }
