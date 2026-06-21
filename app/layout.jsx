@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Telegram PHP Bot + Next.js Web App',
-  description: 'Telegram Mini App frontend for a PHP-hosted bot',
+  title: 'Case Arena Web App',
+  description: 'Premium Telegram case opening web app',
 };
 
 export default function RootLayout({ children }) {
