@@ -311,6 +311,16 @@ select.input {
 
 .textarea { min-height: 92px; resize: vertical; }
 
+.file-input {
+  cursor: pointer;
+}
+
+.field-help {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
