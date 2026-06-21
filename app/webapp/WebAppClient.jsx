@@ -61,6 +61,7 @@ export default function WebAppClient() {
   const [adminWithdrawals, setAdminWithdrawals] = useState([]);
 
   const [caseForm, setCaseForm] = useState(emptyCaseForm);
+  const [caseImageFile, setCaseImageFile] = useState(null);
   const [giftForm, setGiftForm] = useState(emptyGiftForm);
   const [userForm, setUserForm] = useState(emptyUserForm);
 
@@ -80,6 +81,27 @@ export default function WebAppClient() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData, ...payload }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Server xatosi');
+    }
+
+    return data;
+  }, [initData]);
+
+  const apiFormPost = useCallback(async (url, formData) => {
+    if (!initData) {
+      throw new Error('Telegram initData topilmadi. Web App’ni bot tugmasidan oching.');
+    }
+
+    formData.append('initData', initData);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
     });
 
     const data = await response.json().catch(() => ({}));
@@ -179,15 +201,31 @@ export default function WebAppClient() {
     await loadApp();
   }
 
+  async function uploadCaseImage() {
+    if (!caseImageFile) return null;
+
+    const formData = new FormData();
+    formData.append('file', caseImageFile);
+
+    const result = await apiFormPost('/api/admin/upload-case-image', formData);
+    return result.publicUrl;
+  }
+
   async function createCase(event) {
     event.preventDefault();
 
-    await runAction(
-      () => apiPost('/api/admin/case', { action: 'create', ...caseForm }),
-      'Case qo‘shildi ✅'
-    );
+    await runAction(async () => {
+      const uploadedImageUrl = await uploadCaseImage();
+
+      return apiPost('/api/admin/case', {
+        action: 'create',
+        ...caseForm,
+        image_url: uploadedImageUrl || caseForm.image_url || '',
+      });
+    }, 'Case qo‘shildi ✅');
 
     setCaseForm(emptyCaseForm);
+    setCaseImageFile(null);
     await loadApp();
   }
 
@@ -452,7 +490,7 @@ export default function WebAppClient() {
                 <h3>Case qo‘shish</h3>
                 <Input label="Case nomi" value={caseForm.title} onChange={(value) => setCaseForm({ ...caseForm, title: value })} placeholder="Premium Case" />
                 <Input label="Narxi" type="number" value={caseForm.price} onChange={(value) => setCaseForm({ ...caseForm, price: value })} placeholder="5000" />
-                <Input label="Rasm URL" value={caseForm.image_url} onChange={(value) => setCaseForm({ ...caseForm, image_url: value })} placeholder="https://..." />
+                <FileInput label="Case rasmi" file={caseImageFile} onChange={setCaseImageFile} />
                 <Textarea label="Izoh" value={caseForm.description} onChange={(value) => setCaseForm({ ...caseForm, description: value })} placeholder="Case haqida qisqa izoh" />
                 <button className="button wide" disabled={busy}>Qo‘shish</button>
               </form>
@@ -587,6 +625,23 @@ function Empty({ text }) {
 
 function StatusBadge({ status }) {
   return <span className={`status-badge ${status}`}>{status}</span>;
+}
+
+function FileInput({ label, file, onChange }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input
+        className="input file-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        onChange={(event) => onChange(event.target.files?.[0] || null)}
+      />
+      <small className="field-help">
+        {file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PNG, JPG, WEBP yoki GIF yuklash mumkin'}
+      </small>
+    </label>
+  );
 }
 
 function Input({ label, value, onChange, type = 'text', placeholder = '' }) {
