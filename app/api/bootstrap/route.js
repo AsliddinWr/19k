@@ -16,9 +16,17 @@ export async function POST(request) {
       return jsonError('Siz bloklangansiz', 403);
     }
 
+    let casesQuery = supabase.from('cases').select('*').order('created_at', { ascending: false });
+    let giftsQuery = supabase.from('gifts').select('*').order('created_at', { ascending: false });
+
+    if (!auth.isAdmin) {
+      casesQuery = casesQuery.eq('is_active', true);
+      giftsQuery = giftsQuery.eq('is_active', true);
+    }
+
     const [casesResult, giftsResult, historyResult, withdrawResult] = await Promise.all([
-      supabase.from('cases').select('*').eq('is_active', true).order('created_at', { ascending: false }),
-      supabase.from('gifts').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+      casesQuery,
+      giftsQuery,
       supabase
         .from('open_history')
         .select('*')
