@@ -19,17 +19,48 @@ const emptyGiftForm = {
   type: 'gift',
   value: '',
   chance: '10',
-  stock: '1',
-  rarity: 'common',
+  stock: '999',
+  rarity: 'rare',
   image_url: '',
   animation_url: '',
-  background_value: '',
+  background_value: 'linear-gradient(135deg,#ffc400 0%,#23c59a 100%)',
+  is_active: true,
 };
 
 const emptyUserForm = {
   userId: '',
   amount: '',
 };
+
+const GIFT_BACKGROUND_PRESETS = [
+  { name: 'Gold', value: 'linear-gradient(135deg,#ffbf1b 0%,#ff7a00 45%,#241100 100%)' },
+  { name: 'Emerald', value: 'linear-gradient(135deg,#24e28a 0%,#10b981 45%,#06281b 100%)' },
+  { name: 'Violet', value: 'linear-gradient(135deg,#8b5cf6 0%,#4c1d95 50%,#140927 100%)' },
+  { name: 'Ocean', value: 'linear-gradient(135deg,#38bdf8 0%,#2563eb 50%,#07172f 100%)' },
+  { name: 'Rose', value: 'linear-gradient(135deg,#fb7185 0%,#db2777 50%,#2a0612 100%)' },
+  { name: 'Dark', value: 'linear-gradient(135deg,#323232 0%,#171717 55%,#050505 100%)' },
+];
+
+function defaultGiftBackground(rarity = 'rare') {
+  const key = String(rarity || 'rare').toLowerCase();
+  if (key === 'mythic') return GIFT_BACKGROUND_PRESETS[4].value;
+  if (key === 'legendary') return GIFT_BACKGROUND_PRESETS[0].value;
+  if (key === 'epic') return GIFT_BACKGROUND_PRESETS[2].value;
+  if (key === 'rare') return GIFT_BACKGROUND_PRESETS[3].value;
+  return GIFT_BACKGROUND_PRESETS[5].value;
+}
+
+function eligibleGift(gift) {
+  return gift?.is_active !== false && Number(gift?.stock || 0) > 0 && Number(gift?.chance || 0) > 0;
+}
+
+function giftProblem(gift) {
+  if (gift?.is_active === false) return 'Yashirilgan';
+  if (Number(gift?.stock || 0) <= 0) return 'Stock 0';
+  if (Number(gift?.chance || 0) <= 0) return 'Chance 0';
+  return 'Ready';
+}
+
 
 function money(value) {
   const number = Number(value || 0);
@@ -403,7 +434,8 @@ export default function WebAppClient() {
     const activeGiftPool = caseGifts.filter((gift) => gift.is_active !== false && Number(gift.stock || 0) > 0 && Number(gift.chance || 0) > 0);
 
     if (activeGiftPool.length === 0) {
-      setError('Bu case ichida aktiv, stock bor sovg‘a yo‘q.');
+      setSelectedCase(caseItem);
+      setError('Bu case ochilishi uchun kamida 1 ta aktiv sovg‘a kerak: chance > 0, stock > 0 va sovg‘a rasmi kiritilgan bo‘lsin. Admin → Profile → Admin Panel → Gifts bo‘limidan tekshiring.');
       return;
     }
 
@@ -535,18 +567,39 @@ export default function WebAppClient() {
     event.preventDefault();
 
     await runAction(async () => {
+      const chanceNumber = Number(giftForm.chance);
+      const stockNumber = Math.floor(Number(giftForm.stock));
+      const cleanTitle = String(giftForm.title || '').trim();
+
+      if (!giftForm.case_id) throw new Error('Avval sovg‘a qaysi casega qo‘shilishini tanlang.');
+      if (cleanTitle.length < 2) throw new Error('Sovg‘a nomini yozing.');
+      if (!Number.isFinite(chanceNumber) || chanceNumber <= 0 || chanceNumber > 100) throw new Error('Chance 0 dan katta va 100 dan oshmasligi kerak.');
+      if (!Number.isFinite(stockNumber) || stockNumber <= 0) throw new Error('Stock kamida 1 bo‘lishi kerak. Stock 0 bo‘lsa case ochilmaydi.');
+      if (!giftImageFile && !giftForm.image_url) throw new Error('Sovg‘a rasmi majburiy: PNG/WEBP rasm yuklang.');
+
       const uploadedImageUrl = await uploadGiftAsset(giftImageFile, 'image');
       const uploadedAnimationUrl = await uploadGiftAsset(giftAnimationFile, 'animation');
+      const rarity = giftForm.rarity || giftRarity({ chance: chanceNumber });
 
       return apiPost('/api/admin/gift', {
         action: 'create',
         ...giftForm,
+        title: cleanTitle,
+        chance: chanceNumber,
+        stock: stockNumber,
+        rarity,
+        is_active: true,
+        background_value: giftForm.background_value || defaultGiftBackground(rarity),
         image_url: uploadedImageUrl || giftForm.image_url || '',
         animation_url: uploadedAnimationUrl || giftForm.animation_url || '',
       });
     }, 'Sovg‘a qo‘shildi ✅');
 
-    setGiftForm((current) => ({ ...emptyGiftForm, case_id: current.case_id }));
+    setGiftForm((current) => ({
+      ...emptyGiftForm,
+      case_id: current.case_id,
+      background_value: current.background_value || emptyGiftForm.background_value,
+    }));
     setGiftImageFile(null);
     setGiftAnimationFile(null);
     await loadApp();
@@ -677,18 +730,13 @@ export default function WebAppClient() {
             onGoCases={() => setTab('games')}
             onGoInventory={() => setTab('inventory')}
             onOpenCase={openCase}
+            onSelectCase={setSelectedCase}
             busy={busy}
           />
         ) : null}
 
         {tab === 'games' ? (
-          <CasesView
-            cases={activeCases}
-            giftsByCase={giftsByCase}
-            busy={busy}
-            onOpenCase={openCase}
-            onSelectCase={setSelectedCase}
-          />
+          <GamesEmptyView onGoHome={() => setTab('home')} />
         ) : null}
 
         {tab === 'inventory' ? (
@@ -836,8 +884,8 @@ function NavButton({ item, active, onClick, mobile = false }) {
   );
 }
 
-function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, withdrawals, onGoCases, onGoInventory, onOpenCase, busy }) {
-  const featuredCases = cases.slice(0, 4);
+function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, withdrawals, onGoCases, onGoInventory, onOpenCase, onSelectCase, busy }) {
+  const featuredCases = cases;
   const liveDrops = history.slice(0, 10).map((item) => gifts.find((giftItem) => giftItem.id === item.gift_id)).filter(Boolean);
   const topCases = cases.slice(0, 2);
 
@@ -892,7 +940,7 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
       <section className="case-grid-market home-market-grid">
         {featuredCases.length === 0 ? <Empty text="Hali game qo‘shilmagan." /> : null}
         {featuredCases.map((caseItem) => (
-          <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onGoCases} />
+          <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onSelectCase} />
         ))}
       </section>
 
@@ -905,22 +953,15 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
   );
 }
 
-function CasesView({ cases, giftsByCase, busy, onOpenCase, onSelectCase }) {
+function GamesEmptyView({ onGoHome }) {
   return (
-    <div className="screen-stack case-market-screen games-market-screen">
-      <section className="market-header games-header">
-        <div>
-          <div className="eyebrow">Games</div>
-          <h1>Games Arena</h1>
-          <p>Box, daily reward va premium gift o‘yinlarini tanlang. Har bir game ichida real chance va stock nazorati ishlaydi.</p>
-        </div>
-      </section>
-
-      {cases.length === 0 ? <Empty text="Hali aktiv game yo‘q." /> : null}
-      <section className="case-grid-market">
-        {cases.map((caseItem) => (
-          <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onSelectCase} />
-        ))}
+    <div className="screen-stack games-empty-screen">
+      <section className="games-empty-card premium-card">
+        <div className="games-empty-orb"><AppIcon name="games" /></div>
+        <span className="eyebrow">Games</span>
+        <h1>Games bo‘limi tayyorlanmoqda</h1>
+        <p>Hozircha barcha case’lar Home sahifada turadi. Keyin bu bo‘limga Rocket, Upgrade, PVP yoki Daily Box kabi alohida o‘yinlar qo‘shamiz.</p>
+        <button className="primary-btn" onClick={onGoHome}>Home’dagi case’larni ko‘rish</button>
       </section>
     </div>
   );
@@ -1141,6 +1182,12 @@ function AdminView(props) {
     { id: 'withdrawals', label: 'Withdrawals' },
   ];
 
+  const selectedGiftCase = cases.find((item) => String(item.id) === String(giftForm.case_id));
+  const selectedCaseGifts = giftForm.case_id ? (giftsByCase[giftForm.case_id] || []) : [];
+  const selectedCaseActiveChance = chanceSum(selectedCaseGifts);
+  const selectedCaseReadyGifts = selectedCaseGifts.filter(eligibleGift);
+  const selectedCaseRemainingChance = Math.max(0, 100 - selectedCaseActiveChance);
+
   return (
     <div className="screen-stack">
       <PageHeader eyebrow="Admin console" title="Professional management" description="Case, sovg‘a, user va yechish so‘rovlarini tartibli boshqarish." />
@@ -1228,56 +1275,140 @@ function AdminView(props) {
       ) : null}
 
       {adminTab === 'gifts' ? (
-        <div className="admin-workspace">
-          <form className="manager-form premium-card" onSubmit={createGift}>
-            <SectionTitle title="Sovg‘a qo‘shish" description="Har sovg‘aga alohida WEBP/WEBM asset va fon qo‘shing." />
-            <FileInput label="Gift WEBP/PNG rasmi" file={giftImageFile} onChange={setGiftImageFile} accept="image/png,image/jpeg,image/webp,image/gif" helper="WEBP tavsiya qilinadi · max 8MB" />
-            <FileInput label="Gift WEBM/MP4 animatsiya" file={giftAnimationFile} onChange={setGiftAnimationFile} accept="video/webm,video/mp4" helper="WEBM yoki MP4 · max 8MB" />
-            <Select label="Qaysi casega?" value={giftForm.case_id} onChange={(value) => setGiftForm({ ...giftForm, case_id: value })}>
-              <option value="">Case tanlang</option>
-              {cases.map((caseItem) => <option value={caseItem.id} key={caseItem.id}>{caseItem.title}</option>)}
-            </Select>
-            <Input label="Sovg‘a nomi" value={giftForm.title} onChange={(value) => setGiftForm({ ...giftForm, title: value })} placeholder="Telegram Premium 1 oy" />
-            <Input label="Type" value={giftForm.type} onChange={(value) => setGiftForm({ ...giftForm, type: value })} placeholder="premium / stars / bonus" />
-            <Input label="Value" value={giftForm.value} onChange={(value) => setGiftForm({ ...giftForm, value })} placeholder="100 Stars yoki 1 oy" />
-            <div className="two-fields">
-              <Input label="Chance %" type="number" value={giftForm.chance} onChange={(value) => setGiftForm({ ...giftForm, chance: value })} placeholder="10" />
-              <Input label="Stock" type="number" value={giftForm.stock} onChange={(value) => setGiftForm({ ...giftForm, stock: value })} placeholder="5" />
+        <div className="gift-admin-layout">
+          <form className="gift-wizard premium-card" onSubmit={createGift}>
+            <div className="wizard-head">
+              <div>
+                <span className="eyebrow">Gift wizard</span>
+                <h2>Sovg‘a qo‘shish</h2>
+                <p>1) Case tanlang → 2) PNG/WEBP rasm yuklang → 3) WEBM/MP4 animatsiya qo‘shing → 4) Chance va stockni yozing.</p>
+              </div>
+              <div className="wizard-score">
+                <span>Ready gifts</span>
+                <strong>{selectedCaseReadyGifts.length}</strong>
+              </div>
             </div>
-            <Select label="Rarity" value={giftForm.rarity} onChange={(value) => setGiftForm({ ...giftForm, rarity: value })}>
-              <option value="common">Common</option>
-              <option value="rare">Rare</option>
-              <option value="epic">Epic</option>
-              <option value="legendary">Legendary</option>
-              <option value="mythic">Mythic</option>
-            </Select>
-            <Input label="Gift foni" value={giftForm.background_value} onChange={(value) => setGiftForm({ ...giftForm, background_value: value })} placeholder="linear-gradient(135deg,#ffc400,#23c59a)" />
-            <button className="primary-btn full" disabled={busy}>Sovg‘a saqlash</button>
-          </form>
 
-          <div className="manager-list">
-            {gifts.map((gift) => (
-              <div className={`admin-item premium-card rarity-left ${giftRarity(gift)}`} key={gift.id}>
-                <div className="gift-symbol gift-admin-symbol" style={{ background: gift.background_value || undefined }}><GiftMedia gift={gift} compact /></div>
-                <div className="admin-item-main">
-                  <strong>{gift.title}</strong>
-                  <span>{cases.find((item) => item.id === gift.case_id)?.title || 'Case'} · {gift.chance}% · Stock: {gift.stock}</span>
+            <div className="wizard-step">
+              <span className="step-number">1</span>
+              <div className="wizard-field">
+                <Select label="Qaysi casega qo‘shiladi?" value={giftForm.case_id} onChange={(value) => setGiftForm({ ...giftForm, case_id: value })}>
+                  <option value="">Case tanlang</option>
+                  {cases.map((caseItem) => <option value={caseItem.id} key={caseItem.id}>{caseItem.title}</option>)}
+                </Select>
+                {selectedGiftCase ? (
+                  <div className="case-health-card">
+                    <div className="case-health-thumb">{selectedGiftCase.image_url ? <img src={selectedGiftCase.image_url} alt={selectedGiftCase.title} /> : <AppIcon name="box" />}</div>
+                    <div>
+                      <strong>{selectedGiftCase.title}</strong>
+                      <span>{selectedCaseGifts.length} sovg‘a · Ready: {selectedCaseReadyGifts.length} · Chance: {selectedCaseActiveChance}%</span>
+                      <small>Yangi sovg‘a uchun taxminiy qolgan chance: {selectedCaseRemainingChance}%</small>
+                    </div>
+                  </div>
+                ) : <div className="mini-help">Sovg‘a casega bog‘lanmasa, case ichida chiqmaydi.</div>}
+              </div>
+            </div>
+
+            <div className="wizard-step">
+              <span className="step-number">2</span>
+              <div className="wizard-field two-upload-grid">
+                <FileInput label="Sovg‘a rasmi — PNG/WEBP" file={giftImageFile} onChange={setGiftImageFile} accept="image/png,image/jpeg,image/webp" helper="Majburiy · PNG yoki WEBP · max 8MB" />
+                <FileInput label="Yutganda chiqadigan animatsiya — WEBM/MP4" file={giftAnimationFile} onChange={setGiftAnimationFile} accept="video/webm,video/mp4" helper="Tavsiya qilinadi · WEBM/MP4 · max 8MB" />
+              </div>
+            </div>
+
+            <div className="wizard-step">
+              <span className="step-number">3</span>
+              <div className="wizard-field">
+                <Input label="Sovg‘a nomi" value={giftForm.title} onChange={(value) => setGiftForm({ ...giftForm, title: value })} placeholder="Victory Medal / Telegram Premium / 100 Stars" />
+                <div className="two-fields">
+                  <Input label="Type" value={giftForm.type} onChange={(value) => setGiftForm({ ...giftForm, type: value })} placeholder="gift / premium / stars / bonus" />
+                  <Input label="Value" value={giftForm.value} onChange={(value) => setGiftForm({ ...giftForm, value: value })} placeholder="1 oy / 100 Stars / 3.5" />
                 </div>
-                <RarityBadge rarity={giftRarity(gift)} />
-                <div className="admin-actions">
-                  <button className="ghost-btn small" onClick={() => {
-                    const newChance = prompt('Yangi chance:', String(gift.chance || 0));
-                    if (newChance !== null) updateGift(gift, { chance: newChance });
-                  }}>Chance</button>
-                  <button className="ghost-btn small" onClick={() => {
-                    const newStock = prompt('Yangi stock:', String(gift.stock || 0));
-                    if (newStock !== null) updateGift(gift, { stock: newStock });
-                  }}>Stock</button>
-                  <button className="danger-btn small" onClick={() => deleteGift(gift.id)}>O‘chirish</button>
+                <div className="two-fields">
+                  <Input label="Chance %" type="number" value={giftForm.chance} onChange={(value) => setGiftForm({ ...giftForm, chance: value })} placeholder="10" />
+                  <Input label="Stock" type="number" value={giftForm.stock} onChange={(value) => setGiftForm({ ...giftForm, stock: value })} placeholder="999" />
+                </div>
+                <div className="quick-preset-row">
+                  {[1, 5, 10, 25, 50].map((value) => <button type="button" key={value} onClick={() => setGiftForm({ ...giftForm, chance: String(value), rarity: giftRarity({ chance: value }) })}>{value}%</button>)}
+                  {[10, 100, 999].map((value) => <button type="button" key={`stock-${value}`} onClick={() => setGiftForm({ ...giftForm, stock: String(value) })}>Stock {value}</button>)}
                 </div>
               </div>
-            ))}
-            {gifts.length === 0 ? <Empty text="Sovg‘a yo‘q." /> : null}
+            </div>
+
+            <div className="wizard-step">
+              <span className="step-number">4</span>
+              <div className="wizard-field">
+                <Select label="Rarity" value={giftForm.rarity} onChange={(value) => setGiftForm({ ...giftForm, rarity: value, background_value: giftForm.background_value || defaultGiftBackground(value) })}>
+                  <option value="common">Common</option>
+                  <option value="rare">Rare</option>
+                  <option value="epic">Epic</option>
+                  <option value="legendary">Legendary</option>
+                  <option value="mythic">Mythic</option>
+                </Select>
+                <Input label="Gift foni" value={giftForm.background_value} onChange={(value) => setGiftForm({ ...giftForm, background_value: value })} placeholder="linear-gradient(135deg,#ffc400,#23c59a)" />
+                <div className="background-preset-row">
+                  {GIFT_BACKGROUND_PRESETS.map((preset) => (
+                    <button
+                      type="button"
+                      key={preset.name}
+                      style={{ background: preset.value }}
+                      onClick={() => setGiftForm({ ...giftForm, background_value: preset.value })}
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+                <div className="gift-preview-live" style={{ background: giftForm.background_value || defaultGiftBackground(giftForm.rarity) }}>
+                  {giftImageFile ? <img src={URL.createObjectURL(giftImageFile)} alt="Gift preview" /> : <AppIcon name="gem" />}
+                  <div>
+                    <strong>{giftForm.title || 'Gift preview'}</strong>
+                    <span>{giftForm.chance || 0}% · Stock: {giftForm.stock || 0} · {giftForm.rarity}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button className="primary-btn full wizard-save" disabled={busy}>Sovg‘ani saqlash</button>
+          </form>
+
+          <div className="gift-admin-side">
+            <div className="premium-card gift-checklist">
+              <SectionTitle title="Case ochilishi uchun shartlar" description="Shu 4 narsa to‘g‘ri bo‘lsa, “aktiv, stock bor sovg‘a yo‘q” xatosi chiqmaydi." />
+              <ul>
+                <li><AppIcon name="admin" /> Sovg‘a aktiv bo‘lishi kerak</li>
+                <li><AppIcon name="spark" /> Chance 0 dan katta bo‘lishi kerak</li>
+                <li><AppIcon name="box" /> Stock 1 yoki undan katta bo‘lishi kerak</li>
+                <li><AppIcon name="gem" /> PNG/WEBP rasm yuklangan bo‘lishi kerak</li>
+              </ul>
+            </div>
+
+            <div className="manager-list gift-list-pro">
+              {gifts.map((gift) => (
+                <div className={`admin-item premium-card gift-admin-card rarity-left ${gift.rarity || giftRarity(gift)} ${eligibleGift(gift) ? 'ready' : 'not-ready'}`} key={gift.id}>
+                  <div className="gift-symbol gift-admin-symbol" style={{ background: gift.background_value || undefined }}><GiftMedia gift={gift} compact preferStatic /></div>
+                  <div className="admin-item-main">
+                    <strong>{gift.title}</strong>
+                    <span>{cases.find((item) => item.id === gift.case_id)?.title || 'Case'} · {gift.chance}% · Stock: {gift.stock}</span>
+                    <small className={eligibleGift(gift) ? 'ready-text' : 'warning-text'}>{giftProblem(gift)}</small>
+                  </div>
+                  <RarityBadge rarity={gift.rarity || giftRarity(gift)} />
+                  <div className="admin-actions compact-actions">
+                    <button className="ghost-btn small" onClick={() => updateGift(gift, { is_active: gift.is_active === false })}>{gift.is_active === false ? 'Aktiv qilish' : 'Yashirish'}</button>
+                    <button className="ghost-btn small" onClick={() => {
+                      const newChance = prompt('Yangi chance:', String(gift.chance || 0));
+                      if (newChance !== null) updateGift(gift, { chance: newChance });
+                    }}>Chance</button>
+                    <button className="ghost-btn small" onClick={() => {
+                      const newStock = prompt('Yangi stock:', String(gift.stock || 0));
+                      if (newStock !== null) updateGift(gift, { stock: newStock });
+                    }}>Stock</button>
+                    <button className="danger-btn small" onClick={() => deleteGift(gift.id)}>O‘chirish</button>
+                  </div>
+                </div>
+              ))}
+              {gifts.length === 0 ? <Empty text="Sovg‘a yo‘q. Chapdagi wizard orqali birinchi sovg‘ani qo‘shing." /> : null}
+            </div>
           </div>
         </div>
       ) : null}
@@ -1347,7 +1478,9 @@ function AdminView(props) {
 function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
   const accent = caseAccent(caseItem);
   const badge = caseBadgeText(caseItem, gifts);
-  const livePreview = gifts.slice(0, 8);
+  const eligibleGifts = gifts.filter(eligibleGift);
+  const livePreview = (eligibleGifts.length ? eligibleGifts : gifts).slice(0, 12);
+  const canOpen = eligibleGifts.length > 0;
 
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
@@ -1372,22 +1505,30 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
 
         <div className="case-preview-reel">
           <div className="case-preview-pointer" />
-          {(livePreview.length ? livePreview : gifts).map((gift, index) => (
-            <div className={`preview-reel-item ${giftRarity(gift)}`} key={`${gift.id}-${index}`} style={{ background: gift.background_value || undefined }}>
+          {livePreview.map((gift, index) => (
+            <div className={`preview-reel-item ${gift.rarity || giftRarity(gift)} ${eligibleGift(gift) ? '' : 'disabled-gift'}`} key={`${gift.id}-${index}`} style={{ background: gift.background_value || undefined }}>
               <GiftMedia gift={gift} preferStatic />
+              <small>{gift.chance}%</small>
             </div>
           ))}
           {gifts.length === 0 ? <Empty text="Bu gamega hali sovg‘a qo‘shilmagan." /> : null}
         </div>
 
-        <button className="open-big-btn" disabled={busy || gifts.length === 0} onClick={onOpen}><AppIcon name="gift" /> Open {caseItem.title}</button>
+        {!canOpen ? (
+          <div className="case-warning-box">
+            <strong>Bu case hali ochilmaydi</strong>
+            <span>Kamida 1 ta sovg‘ada active=true, chance &gt; 0, stock &gt; 0 va rasm bo‘lishi kerak.</span>
+          </div>
+        ) : null}
+
+        <button className="open-big-btn" disabled={busy || !canOpen} onClick={onOpen}><AppIcon name="gift" /> Open {caseItem.title}</button>
 
         <div className="case-prize-grid">
           {gifts.map((gift) => (
-            <div className={`prize-card ${giftRarity(gift)}`} key={gift.id} style={{ background: gift.background_value || undefined }}>
+            <div className={`prize-card ${gift.rarity || giftRarity(gift)} ${eligibleGift(gift) ? 'ready' : 'not-ready'}`} key={gift.id} style={{ background: gift.background_value || undefined }}>
               <GiftMedia gift={gift} preferStatic />
               <strong>{gift.title}</strong>
-              <small>{gift.chance}% · Stock: {gift.stock}</small>
+              <small>{gift.chance}% · Stock: {gift.stock} · {giftProblem(gift)}</small>
             </div>
           ))}
         </div>
