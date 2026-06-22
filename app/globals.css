@@ -4545,7 +4545,7 @@ span.gift-media {
   .promo-image-banner.rocket .promo-banner-webp {
   object-position: center center;
   object-fit: contain;
-  transform: translateX(-28px) scale(1.05);
+  transform: translateX(-24px) scale(1.15);
   transform-origin: center center;
 }
 
