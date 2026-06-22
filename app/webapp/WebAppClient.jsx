@@ -912,23 +912,40 @@ function NavButton({ item, active, onClick, mobile = false }) {
 }
 
 
-function PromoMedia({ src, icon }) {
+function PromoImageCard({ variant, image, badge, badgeIcon, title, subtitle, fallbackIcon, onClick }) {
   const [failed, setFailed] = useState(false);
 
-  if (!src || failed) {
-    return (
-      <span className="promo-banner-fallback" aria-hidden="true">
-        <AppIcon name={icon} />
-      </span>
-    );
-  }
-
   return (
-    <span className="promo-banner-media" aria-hidden="true">
-      <video autoPlay loop muted playsInline preload="metadata" onError={() => setFailed(true)}>
-        <source src={src} type="video/webm" />
-      </video>
-    </span>
+    <button
+      type="button"
+      className={`promo-banner promo-image-banner ${variant} ${failed ? 'image-failed' : ''}`}
+      onClick={onClick}
+      aria-label={`${title}. ${subtitle}`}
+    >
+      {!failed ? (
+        <img
+          className="promo-banner-webp"
+          src={image}
+          alt=""
+          loading="eager"
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <>
+          <span className={`promo-badge ${variant === 'pvp' ? 'new' : ''}`}>
+            <AppIcon name={badgeIcon} /> {badge}
+          </span>
+          <span className="promo-banner-fallback" aria-hidden="true">
+            <AppIcon name={fallbackIcon} />
+          </span>
+          <span className="promo-banner-text">
+            <strong>{title}</strong>
+            <small>{subtitle}</small>
+          </span>
+        </>
+      )}
+    </button>
   );
 }
 
@@ -966,22 +983,26 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
       </section>
 
       <section className="promo-banners-grid">
-        <button className="promo-banner rocket" onClick={onGoCases}>
-          <PromoMedia src={process.env.NEXT_PUBLIC_ROCKET_WEBM_URL || '/animations/rocket.webm'} icon="rocket" />
-          <span className="promo-badge"><AppIcon name="spark" /> HOT!</span>
-          <span className="promo-banner-text">
-            <strong>ROCKET</strong>
-            <small>Premium game larni oching</small>
-          </span>
-        </button>
-        <button className="promo-banner pvp" onClick={onGoCases}>
-          <PromoMedia src={process.env.NEXT_PUBLIC_PVP_WEBM_URL || '/animations/pvp.webm'} icon="swords" />
-          <span className="promo-badge new"><AppIcon name="spark" /> NEW!</span>
-          <span className="promo-banner-text">
-            <strong>PVP</strong>
-            <small>Omadingizni sinang</small>
-          </span>
-        </button>
+        <PromoImageCard
+          variant="rocket"
+          image="/feature/rocket.webp"
+          badge="HOT!"
+          badgeIcon="spark"
+          title="ROCKET"
+          subtitle="Premium game larni oching"
+          fallbackIcon="rocket"
+          onClick={onGoCases}
+        />
+        <PromoImageCard
+          variant="pvp"
+          image="/feature/pvp.webp"
+          badge="NEW!"
+          badgeIcon="spark"
+          title="PVP"
+          subtitle="Omadingizni sinang"
+          fallbackIcon="swords"
+          onClick={onGoCases}
+        />
         <button className="mini-feature contracts" onClick={onGoInventory}><AppIcon name="inventory" /> CONTRACTS <span>›</span></button>
         <button className="mini-feature upgrade" onClick={onGoCases}><AppIcon name="spark" /> UPGRADE <span>›</span></button>
       </section>
