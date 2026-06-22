@@ -70,7 +70,7 @@ function caseBadgeText(caseItem, gifts = []) {
 }
 
 function coinIcon() {
-  return '💎';
+  return <AppIcon name="coin" />;
 }
 
 function groupGiftsByCase(gifts) {
@@ -187,6 +187,57 @@ function HexLoader({ size = 'normal' }) {
   );
 }
 
+function AppIcon({ name, className = '' }) {
+  const common = {
+    className: `app-icon ${className}`.trim(),
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    xmlns: 'http://www.w3.org/2000/svg',
+    'aria-hidden': 'true',
+  };
+
+  switch (name) {
+    case 'home':
+      return <svg {...common}><path d="M4 10.6 12 4l8 6.6V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.4Z"/><path d="M3 11.2 12 3l9 8.2"/></svg>;
+    case 'cases':
+      return <svg {...common}><path d="M5 8h14v12H5V8Z"/><path d="M7 8V6.8A2.8 2.8 0 0 1 9.8 4h4.4A2.8 2.8 0 0 1 17 6.8V8"/><path d="M5 12h14M12 8v12"/></svg>;
+    case 'inventory':
+      return <svg {...common}><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>;
+    case 'history':
+      return <svg {...common}><path d="M4 12a8 8 0 1 0 2.35-5.65"/><path d="M4 5v5h5"/><path d="M12 7v5l3 2"/></svg>;
+    case 'profile':
+      return <svg {...common}><path d="M20 21a8 8 0 0 0-16 0"/><path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/></svg>;
+    case 'coin':
+      return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M8.5 8h7L12 18 8.5 8Z"/><path d="m8.5 8 3.5 4 3.5-4"/></svg>;
+    case 'deposit':
+      return <svg {...common}><path d="M4 7h16v12H4V7Z"/><path d="M7 7V5h10v2"/><path d="M8 13h5"/><path d="m11 10 3 3-3 3"/></svg>;
+    case 'live':
+      return <svg {...common}><circle cx="12" cy="12" r="3"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>;
+    case 'rocket':
+      return <svg {...common}><path d="M13 4c4 1 6 3 7 7l-6 6-5-5 4-8Z"/><path d="M9 12 5 13l-2 5 5-2 1-4Z"/><path d="M14 17v3l-4 2v-4M7 10H4l2-4h4"/><circle cx="15" cy="9" r="1.5"/></svg>;
+    case 'swords':
+      return <svg {...common}><path d="m14 4 6 6-2 2-6-6 2-2Z"/><path d="m10 14-4 4M5 21l4-4"/><path d="m10 4-6 6 2 2 6-6-2-2Z"/><path d="m14 14 4 4m1 3-4-4"/></svg>;
+    case 'admin':
+      return <svg {...common}><path d="M12 3 5 6v5c0 5 3.5 8.5 7 10 3.5-1.5 7-5 7-10V6l-7-3Z"/><path d="M9 12l2 2 4-5"/></svg>;
+    case 'gift':
+      return <svg {...common}><path d="M4 10h16v10H4V10Z"/><path d="M3 7h18v3H3V7Z"/><path d="M12 7v13"/><path d="M12 7c-2.5 0-4-1-4-2.4A1.8 1.8 0 0 1 11.2 3L12 7Zm0 0c2.5 0 4-1 4-2.4A1.8 1.8 0 0 0 12.8 3L12 7Z"/></svg>;
+    case 'gem':
+      return <svg {...common}><path d="M6 4h12l4 6-10 11L2 10l4-6Z"/><path d="M2 10h20M8 4l4 17 4-17"/></svg>;
+    case 'box':
+      return <svg {...common}><path d="M4 8 12 4l8 4-8 4-8-4Z"/><path d="M4 8v8l8 4 8-4V8"/><path d="M12 12v8"/></svg>;
+    case 'withdraw':
+      return <svg {...common}><path d="M5 20h14"/><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/></svg>;
+    case 'spark':
+      return <svg {...common}><path d="M12 2l2.2 6.2L20 10l-5.8 1.8L12 18l-2.2-6.2L4 10l5.8-1.8L12 2Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg>;
+    default:
+      return <svg {...common}><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>;
+  }
+}
+
+function metricIconName(icon) {
+    return icon || 'spark';
+}
+
 export default function WebAppClient() {
   const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Case Arena';
 
@@ -224,17 +275,13 @@ export default function WebAppClient() {
   const pendingWithdrawals = withdrawals.filter((item) => item.status === 'pending').length;
   const adminPendingWithdrawals = adminWithdrawals.filter((item) => item.status === 'pending').length;
 
-  const navItems = useMemo(() => {
-    const base = [
-      { id: 'home', icon: '✦', label: 'Home' },
-      { id: 'cases', icon: '🎁', label: 'Cases' },
-      { id: 'inventory', icon: '💎', label: 'Inventory' },
-      { id: 'profile', icon: '👤', label: 'Profile' },
-    ];
-
-    if (isAdmin) base.push({ id: 'admin', icon: '👑', label: 'Admin' });
-    return base;
-  }, [isAdmin]);
+  const navItems = useMemo(() => ([
+    { id: 'cases', icon: 'cases', label: 'Cases' },
+    { id: 'inventory', icon: 'inventory', label: 'Inventory' },
+    { id: 'home', icon: 'home', label: 'Home', center: true },
+    { id: 'history', icon: 'history', label: 'History' },
+    { id: 'profile', icon: 'profile', label: 'Profile' },
+  ]), []);
 
   const showToast = useCallback((message) => {
     setToast(message);
@@ -653,6 +700,15 @@ export default function WebAppClient() {
           />
         ) : null}
 
+        {tab === 'history' ? (
+          <HistoryView
+            history={history}
+            gifts={gifts}
+            cases={cases}
+            withdrawals={withdrawals}
+          />
+        ) : null}
+
         {tab === 'profile' ? (
           <ProfileView
             telegramUser={telegramUser}
@@ -738,7 +794,7 @@ export default function WebAppClient() {
 function Brand({ appName, compact = false }) {
   return (
     <div className={`brand ${compact ? 'compact' : ''}`}>
-      <div className="brand-mark">◆</div>
+      <div className="brand-mark"><AppIcon name="gem" /></div>
       <div>
         <strong>{appName}</strong>
         <span>Premium case opening</span>
@@ -771,8 +827,8 @@ function UserMini({ telegramUser, profile }) {
 
 function NavButton({ item, active, onClick, mobile = false }) {
   return (
-    <button className={`${mobile ? 'mobile-nav-btn' : 'rail-nav-btn'} ${active ? 'active' : ''}`} onClick={onClick}>
-      <span>{item.icon}</span>
+    <button className={`${mobile ? 'mobile-nav-btn' : 'rail-nav-btn'} ${item.center ? 'center-home' : ''} ${active ? 'active' : ''}`} onClick={onClick}>
+      <span><AppIcon name={item.icon} /></span>
       <strong>{item.label}</strong>
     </button>
   );
@@ -789,45 +845,45 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
         <div className="home-profile-balance">
           <div className="home-avatar-wrap">
             <div className="home-avatar">{telegramUser?.first_name?.[0] || 'U'}</div>
-            <span className="home-gear">⚙</span>
+            <span className="home-gear"><AppIcon name="admin" /></span>
           </div>
           <div>
             <span>Your balance</span>
             <strong><b>{coinIcon()}</b> {formatPrice(profile?.balance)}</strong>
           </div>
         </div>
-        <button className="deposit-btn">▣ Deposit</button>
+        <button className="deposit-btn"><AppIcon name="deposit" /> Deposit</button>
       </section>
 
       <section className="live-strip-card">
-        <div className="live-title"><span /> Live</div>
+        <div className="live-title"><span /><AppIcon name="live" /> Live</div>
         <div className="live-strip-track">
           {(liveDrops.length ? liveDrops : gifts.slice(0, 8)).map((gift, index) => (
             <div className="live-drop-item" key={`${gift?.id || 'gift'}-${index}`} style={{ background: gift?.background_value || undefined }}>
               <GiftMedia gift={gift} compact />
             </div>
           ))}
-          {gifts.length === 0 && liveDrops.length === 0 ? [0,1,2,3,4,5].map((item) => <div className="live-drop-item" key={item}>💎</div>) : null}
+          {gifts.length === 0 && liveDrops.length === 0 ? [0,1,2,3,4,5].map((item) => <div className="live-drop-item" key={item}><AppIcon name="gem" /></div>) : null}
         </div>
       </section>
 
       <section className="promo-banners-grid">
         <button className="promo-banner rocket" onClick={onGoCases}>
-          <span className="promo-badge">⚡ HOT!</span>
-          <strong>🚀 ROCKET</strong>
+          <span className="promo-badge"><AppIcon name="spark" /> HOT!</span>
+          <strong><AppIcon name="rocket" /> ROCKET</strong>
           <small>Premium case larni oching</small>
         </button>
         <button className="promo-banner pvp" onClick={onGoCases}>
-          <span className="promo-badge new">🔥 NEW!</span>
-          <strong>⚔ PVP</strong>
+          <span className="promo-badge new"><AppIcon name="spark" /> NEW!</span>
+          <strong><AppIcon name="swords" /> PVP</strong>
           <small>Omadingizni sinang</small>
         </button>
-        <button className="mini-feature contracts" onClick={onGoInventory}>▣ CONTRACTS <span>›</span></button>
-        <button className="mini-feature upgrade" onClick={onGoCases}>↟ UPGRADE <span>›</span></button>
+        <button className="mini-feature contracts" onClick={onGoInventory}><AppIcon name="inventory" /> CONTRACTS <span>›</span></button>
+        <button className="mini-feature upgrade" onClick={onGoCases}><AppIcon name="spark" /> UPGRADE <span>›</span></button>
       </section>
 
       <section className="home-section-head">
-        <div><span>▱</span><strong>Daily Rewards</strong></div>
+        <div><span><AppIcon name="gift" /></span><strong>Daily Rewards</strong></div>
         <button onClick={onGoCases}>Hammasi</button>
       </section>
 
@@ -839,9 +895,9 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
       </section>
 
       <section className="quick-stats-row">
-        <MetricCard label="Aktiv case" value={cases.length} icon="🎁" tone="cyan" />
-        <MetricCard label="Yutuqlar" value={history.length} icon="🏆" tone="purple" />
-        <MetricCard label="Yechishlar" value={withdrawals.length} icon="📤" tone="green" />
+        <MetricCard label="Aktiv case" value={cases.length} icon="cases" tone="cyan" />
+        <MetricCard label="Yutuqlar" value={history.length} icon="spark" tone="purple" />
+        <MetricCard label="Yechishlar" value={withdrawals.length} icon="withdraw" tone="green" />
       </section>
     </div>
   );
@@ -881,8 +937,8 @@ function CaseCard({ caseItem, gifts, busy, onOpen, onDetails }) {
       onClick={() => onDetails(caseItem)}
     >
       <div className="market-case-art">
-        {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <div className="case-placeholder">🎁</div>}
-        {badge ? <div className="market-case-badge">✣ {badge}</div> : null}
+        {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <div className="case-placeholder"><AppIcon name="box" /></div>}
+        {badge ? <div className="market-case-badge"><AppIcon name="spark" /> {badge}</div> : null}
         <div className="case-art-shine" />
       </div>
       <div className="market-case-footer">
@@ -906,30 +962,28 @@ function CaseCard({ caseItem, gifts, busy, onOpen, onDetails }) {
   );
 }
 
-function GiftMedia({ gift, compact = false }) {
+function GiftMedia({ gift, compact = false, preferStatic = false }) {
   const mediaClass = compact ? 'gift-media compact' : 'gift-media';
-  if (!gift) return <span className={mediaClass}>💎</span>;
+  if (!gift) return <span className={mediaClass}><AppIcon name="gem" /></span>;
 
   const animationUrl = gift.animation_url || '';
   const imageUrl = gift.image_url || '';
 
-  if (animationUrl) {
-    return (
-      <video className={mediaClass} src={animationUrl} autoPlay muted loop playsInline />
-    );
+  if (animationUrl && !preferStatic) {
+    return <video className={mediaClass} src={animationUrl} autoPlay muted loop playsInline preload="metadata" />;
   }
 
   if (imageUrl) {
-    return <img className={mediaClass} src={imageUrl} alt={gift.title || 'Gift'} />;
+    return <img className={mediaClass} src={imageUrl} alt={gift.title || 'Gift'} loading="lazy" />;
   }
 
-  return <span className={mediaClass}>{giftIcon(gift)}</span>;
+  return <span className={mediaClass}><AppIcon name={giftIcon(gift)} /></span>;
 }
 
 function CompactCaseRow({ caseItem, gifts, onOpen, busy }) {
   return (
     <div className="compact-case-row">
-      <div className="mini-case-img">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : '🎁'}</div>
+      <div className="mini-case-img">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <AppIcon name="box" />}</div>
       <div>
         <strong>{caseItem.title}</strong>
         <span>{money(caseItem.price)} so‘m · {gifts.length} sovg‘a</span>
@@ -940,32 +994,76 @@ function CompactCaseRow({ caseItem, gifts, onOpen, busy }) {
 }
 
 function InventoryView({ history, gifts, cases, withdrawals, busy, onWithdraw }) {
-  return (
-    <div className="screen-stack">
-      <PageHeader eyebrow="Inventory" title="Yutgan sovg‘alarim" description="Yutuqlar ro‘yxati va yechib olish so‘rovlari." />
-      <section className="inventory-grid">
-        {history.length === 0 ? <Empty text="Inventory hozircha bo‘sh. Case ochib birinchi sovg‘angizni oling." /> : null}
-        {history.map((item) => {
-          const gift = gifts.find((giftItem) => giftItem.id === item.gift_id);
-          const caseItem = cases.find((caseValue) => caseValue.id === item.case_id);
-          const request = withdrawals.find((withdraw) => withdraw.gift_id === item.gift_id);
+  const wins = history.map((item) => {
+    const gift = gifts.find((giftItem) => giftItem.id === item.gift_id);
+    const caseItem = cases.find((caseValue) => caseValue.id === item.case_id);
+    const request = withdrawals.find((withdraw) => withdraw.gift_id === item.gift_id && String(withdraw.user_id || '') === String(item.user_id || withdraw.user_id || ''));
+    return { item, gift, caseItem, request };
+  });
 
-          return (
-            <article className={`inventory-card premium-card ${giftRarity(gift)}`} key={item.id}>
-              <div className="inventory-icon">{giftIcon(gift)}</div>
-              <div>
-                <RarityBadge rarity={giftRarity(gift)} />
-                <h3>{gift?.title || 'Sovg‘a'}</h3>
-                <p>{caseItem?.title || 'Case'} · {new Date(item.created_at).toLocaleString('uz-UZ')}</p>
-              </div>
-              <div className="inventory-actions">
-                {request ? <StatusBadge status={request.status} /> : null}
-                <button className="primary-btn small" disabled={busy || !item.gift_id} onClick={() => onWithdraw(item.gift_id)}>Yechish</button>
-              </div>
-            </article>
-          );
-        })}
+  return (
+    <div className="screen-stack inventory-screen-pro">
+      <section className="inventory-hero premium-card">
+        <div>
+          <span className="eyebrow">Inventory</span>
+          <h1>Yutgan sovg‘alarim</h1>
+          <p>Har bir yutuq alohida kartada ko‘rinadi. WEBM animatsiya bo‘lsa, avtomatik preview chiqadi.</p>
+        </div>
+        <div className="inventory-count-chip"><AppIcon name="inventory" /> {wins.length}</div>
       </section>
+
+      <section className="inventory-grid-pro">
+        {wins.length === 0 ? <Empty text="Inventory hozircha bo‘sh. Case ochib birinchi sovg‘angizni oling." /> : null}
+        {wins.map(({ item, gift, caseItem, request }) => (
+          <article className={`inventory-prize-card ${giftRarity(gift)}`} key={item.id} style={{ '--gift-bg': gift?.background_value || 'linear-gradient(135deg,#1f2937,#111827)' }}>
+            <div className="inventory-prize-art">
+              <GiftMedia gift={gift} />
+              <div className="inventory-glow" />
+            </div>
+            <div className="inventory-prize-body">
+              <div className="inventory-prize-top">
+                <RarityBadge rarity={gift?.rarity || giftRarity(gift)} />
+                {request ? <StatusBadge status={request.status} /> : <span className="status-badge available">available</span>}
+              </div>
+              <h3>{gift?.title || 'Sovg‘a'}</h3>
+              <p>{caseItem?.title || 'Case'} · {new Date(item.created_at).toLocaleString('uz-UZ')}</p>
+              <div className="inventory-prize-actions">
+                <button className="primary-btn small" disabled={busy || !item.gift_id || Boolean(request)} onClick={() => onWithdraw(item.gift_id)}>
+                  <AppIcon name="withdraw" /> {request ? 'So‘rov yuborilgan' : 'Yechish'}
+                </button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+function HistoryView({ history, gifts, cases, withdrawals }) {
+  const rows = history.map((item) => {
+    const gift = gifts.find((giftItem) => giftItem.id === item.gift_id);
+    const caseItem = cases.find((caseValue) => caseValue.id === item.case_id);
+    const request = withdrawals.find((withdraw) => withdraw.gift_id === item.gift_id);
+    return { item, gift, caseItem, request };
+  });
+
+  return (
+    <div className="screen-stack history-screen-pro">
+      <PageHeader eyebrow="History" title="Opening history" description="Oxirgi ochilgan case’lar, chiqqan sovg‘alar va yechish holatlari." />
+      <div className="history-list-pro">
+        {rows.length === 0 ? <Empty text="Hali tarix yo‘q." /> : null}
+        {rows.map(({ item, gift, caseItem, request }) => (
+          <article className="history-row-pro premium-card" key={item.id}>
+            <div className="history-art" style={{ background: gift?.background_value || undefined }}><GiftMedia gift={gift} compact preferStatic /></div>
+            <div>
+              <strong>{gift?.title || 'Sovg‘a'}</strong>
+              <span>{caseItem?.title || 'Case'} · {new Date(item.created_at).toLocaleString('uz-UZ')}</span>
+            </div>
+            <StatusBadge status={request?.status || 'won'} />
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
@@ -983,14 +1081,14 @@ function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gif
           </div>
           <div className="profile-actions-box">
             <BalancePill balance={profile?.balance} />
-            {isAdmin ? <button className="admin-profile-btn" onClick={onOpenAdmin}>👑 Admin Panel</button> : null}
+            {isAdmin ? <button className="admin-profile-btn" onClick={onOpenAdmin}><AppIcon name="admin" /> Admin Panel</button> : null}
           </div>
         </div>
 
         <div className="metrics-grid nested">
-          <MetricCard label="Total opens" value={totalOpenings} icon="🎲" tone="purple" />
-          <MetricCard label="Wins" value={history.length} icon="🏆" tone="gold" />
-          <MetricCard label="Cases" value={cases.length} icon="🎁" tone="cyan" />
+          <MetricCard label="Total opens" value={totalOpenings} icon="spark" tone="purple" />
+          <MetricCard label="Wins" value={history.length} icon="spark" tone="gold" />
+          <MetricCard label="Cases" value={cases.length} icon="cases" tone="cyan" />
           <MetricCard label="Pending" value={pendingWithdrawals} icon="⏳" tone="green" />
         </div>
       </section>
@@ -1012,7 +1110,7 @@ function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gif
           <div className="activity-list">
             {withdrawals.map((item) => {
               const gift = gifts.find((giftItem) => giftItem.id === item.gift_id);
-              return <ActivityRow key={item.id} icon="📤" title={gift?.title || 'Sovg‘a'} meta={<StatusBadge status={item.status} />} />;
+              return <ActivityRow key={item.id} icon="withdraw" title={gift?.title || 'Sovg‘a'} meta={<StatusBadge status={item.status} />} />;
             })}
             {withdrawals.length === 0 ? <Empty text="Yechish so‘rovi yo‘q." /> : null}
           </div>
@@ -1053,9 +1151,9 @@ function AdminView(props) {
       {adminTab === 'dashboard' ? (
         <section className="screen-stack">
           <div className="metrics-grid">
-            <MetricCard label="All cases" value={cases.length} icon="🎁" tone="cyan" />
-            <MetricCard label="All gifts" value={gifts.length} icon="💎" tone="purple" />
-            <MetricCard label="Users" value={adminUsers.length} icon="👥" tone="green" />
+            <MetricCard label="All cases" value={cases.length} icon="cases" tone="cyan" />
+            <MetricCard label="All gifts" value={gifts.length} icon="gem" tone="purple" />
+            <MetricCard label="Users" value={adminUsers.length} icon="profile" tone="green" />
             <MetricCard label="Pending" value={adminPendingWithdrawals} icon="⏳" tone="gold" />
           </div>
           <div className="split-grid">
@@ -1070,9 +1168,9 @@ function AdminView(props) {
             <div className="premium-card section-card">
               <SectionTitle title="System status" description="Web App holati." />
               <div className="system-list">
-                <ActivityRow icon="🟢" title="Telegram auth" meta="Active" />
-                <ActivityRow icon="🟢" title="Supabase database" meta="Connected" />
-                <ActivityRow icon="🟢" title="Image upload" meta="Storage ready" />
+                <ActivityRow icon="spark" title="Telegram auth" meta="Active" />
+                <ActivityRow icon="spark" title="Supabase database" meta="Connected" />
+                <ActivityRow icon="spark" title="Image upload" meta="Storage ready" />
               </div>
             </div>
           </div>
@@ -1098,10 +1196,10 @@ function AdminView(props) {
           <div className="manager-list">
             {cases.map((caseItem) => (
               <div className="admin-item premium-card" key={caseItem.id}>
-                <div className="admin-thumb">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : '🎁'}</div>
+                <div className="admin-thumb">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <AppIcon name="box" />}</div>
                 <div className="admin-item-main">
                   <strong>{caseItem.title}</strong>
-                  <span>{formatPrice(caseItem.price)} 💎 · {(giftsByCase[caseItem.id] || []).length} sovg‘a · {caseItem.is_active ? 'Aktiv' : 'Yashirilgan'}</span>
+                  <span>{formatPrice(caseItem.price)} <AppIcon name="coin" /> · {(giftsByCase[caseItem.id] || []).length} sovg‘a · {caseItem.is_active ? 'Aktiv' : 'Yashirilgan'}</span>
                   {caseItem.badge_text ? <small className="admin-case-badge" style={{ background: caseBadgeColor(caseItem) }}>{caseItem.badge_text}</small> : null}
                 </div>
                 <div className="admin-actions">
@@ -1223,7 +1321,7 @@ function AdminView(props) {
           <div className="manager-list single">
             {adminWithdrawals.map((item) => (
               <div className="admin-item premium-card" key={item.id}>
-                <div className="gift-symbol">📤</div>
+                <div className="gift-symbol"><AppIcon name="withdraw" /></div>
                 <div className="admin-item-main">
                   <strong>{item.gifts?.title || 'Sovg‘a'}</strong>
                   <span>{item.users?.first_name || 'User'} {item.users?.username ? `@${item.users.username}` : ''} · ID: {item.users?.id}</span>
@@ -1254,16 +1352,16 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
       <article className="case-detail-sheet" style={{ '--case-accent': accent, '--case-badge': caseBadgeColor(caseItem) }} onMouseDown={(event) => event.stopPropagation()}>
         <button className="close-btn market-close" onClick={onClose}>×</button>
         <div className="case-detail-top">
-          <div className="daily-label"><span>▣</span> {badge || 'DAILY BOX'}</div>
+          <div className="daily-label"><span><AppIcon name="gift" /></span> {badge || 'DAILY BOX'}</div>
           <div className="latest-drops">Latest TOP drops <i /> <i /> <i /></div>
         </div>
 
         <div className="case-detail-feature">
           <div className="case-detail-thumb">
-            {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <span>🎁</span>}
+            {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <span><AppIcon name="box" /></span>}
           </div>
           <div>
-            <span className="hot-pill">● HOT</span>
+            <span className="hot-pill"><AppIcon name="spark" /> HOT</span>
             <h2>{caseItem.title}</h2>
             <strong>{formatPrice(caseItem.price)} {coinIcon()}</strong>
             <p>{caseItem.description || 'Bu case ichida premium sovg‘alar, bonuslar va chance bo‘yicha yutuqlar bor.'}</p>
@@ -1280,7 +1378,7 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
           {gifts.length === 0 ? <Empty text="Bu casega hali sovg‘a qo‘shilmagan." /> : null}
         </div>
 
-        <button className="open-big-btn" disabled={busy || gifts.length === 0} onClick={onOpen}>🎁 Open {caseItem.title}</button>
+        <button className="open-big-btn" disabled={busy || gifts.length === 0} onClick={onOpen}><AppIcon name="gift" /> Open {caseItem.title}</button>
 
         <div className="case-prize-grid">
           {gifts.map((gift) => (
@@ -1320,8 +1418,8 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
                 style={{ '--reel-distance': `${reelDistance}px` }}
               >
                 {activeReel.map((item, index) => (
-                  <div className={`pro-reel-item ${giftRarity(item)}`} key={`${item?.id || 'gift'}-${index}`}>
-                    <span>{giftIcon(item)}</span>
+                  <div className={`pro-reel-item ${giftRarity(item)}`} key={`${item?.id || 'gift'}-${index}`} style={{ background: item?.background_value || undefined }}>
+                    <GiftMedia gift={item} preferStatic />
                     <strong>{item?.title || 'Sovg‘a'}</strong>
                     <small>{Number(item?.chance || 0)}%</small>
                   </div>
@@ -1329,9 +1427,9 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
               </div>
             </div>
             <div className="opening-info-row">
-              <span>🎯 Server random</span>
-              <span>📦 Stock nazorat</span>
-              <span>🔐 Secure logic</span>
+              <span><AppIcon name="spark" /> Server random</span>
+              <span><AppIcon name="box" /> Stock nazorat</span>
+              <span><AppIcon name="admin" /> Secure logic</span>
             </div>
             <p>Natija serverda tanlanadi. Animatsiya faqat chiroyli ko‘rsatish uchun.</p>
           </>
@@ -1340,10 +1438,10 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
             <button className="close-btn" onClick={onClose}>×</button>
             <div className={`win-result ${giftRarity(gift)}`}>
               <div className="win-confetti">
-                <span>✦</span><span>◆</span><span>✧</span><span>●</span><span>✦</span>
+                <span /><span /><span /><span /><span />
               </div>
-              <div className="win-spark">JACKPOT HIT</div>
-              <div className="win-gift">{giftIcon(gift)}</div>
+              <div className="win-spark"><AppIcon name="spark" /> JACKPOT HIT</div>
+              <div className="win-gift-media" style={{ background: gift?.background_value || undefined }}><GiftMedia gift={gift} /></div>
               <RarityBadge rarity={giftRarity(gift)} />
               <h2>{gift?.title}</h2>
               <p>Tabriklaymiz! Sovg‘a inventory’ga tushdi va tarixga yozildi.</p>
@@ -1399,7 +1497,7 @@ function SectionTitle({ title, description }) {
 function MetricCard({ label, value, icon, tone = 'cyan' }) {
   return (
     <div className={`metric-card premium-card ${tone}`}>
-      <span>{icon}</span>
+      <span><AppIcon name={metricIconName(icon)} /></span>
       <div>
         <small>{label}</small>
         <strong>{value}</strong>
@@ -1411,7 +1509,7 @@ function MetricCard({ label, value, icon, tone = 'cyan' }) {
 function ActivityRow({ icon, title, meta }) {
   return (
     <div className="activity-row">
-      <div className="activity-icon">{icon}</div>
+      <div className="activity-icon"><AppIcon name={metricIconName(icon)} /></div>
       <div>
         <strong>{title}</strong>
         <span>{meta}</span>
@@ -1434,12 +1532,11 @@ function RarityBadge({ rarity }) {
 
 function giftIcon(gift) {
   const text = `${gift?.type || ''} ${gift?.title || ''}`.toLowerCase();
-  if (text.includes('premium')) return '⭐';
-  if (text.includes('star')) return '🌟';
-  if (text.includes('bonus') || text.includes('balans')) return '💰';
-  if (text.includes('promocode') || text.includes('promo')) return '🎟️';
-  if (text.includes('nothing') || text.includes('bo‘sh') || text.includes('bosh')) return '▫️';
-  return '💎';
+  if (text.includes('premium') || text.includes('star')) return 'spark';
+  if (text.includes('bonus') || text.includes('balans')) return 'coin';
+  if (text.includes('promocode') || text.includes('promo')) return 'gift';
+  if (text.includes('nothing') || text.includes('bo‘sh') || text.includes('bosh')) return 'box';
+  return 'gem';
 }
 
 function FileInput({ label, file, onChange, accept = 'image/png,image/jpeg,image/webp,image/gif', helper = 'PNG, JPG, WEBP yoki GIF · max 4MB' }) {
