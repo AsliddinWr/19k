@@ -4385,3 +4385,17 @@ span.gift-media {
     grid-template-columns: 1fr;
   }
 }
+
+/* JSON URL import action — old designni buzmaydi, faqat Gift Catalog formiga qo‘shimcha button qatori. */
+.market-sync-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.market-sync-actions span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
