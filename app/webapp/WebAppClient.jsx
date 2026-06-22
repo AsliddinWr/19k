@@ -7,6 +7,10 @@ const emptyCaseForm = {
   description: '',
   price: '0',
   image_url: '',
+  badge_text: '',
+  badge_color: '#f6b7b1',
+  accent_color: '#22c55e',
+  card_style: 'default',
 };
 
 const emptyGiftForm = {
@@ -16,6 +20,10 @@ const emptyGiftForm = {
   value: '',
   chance: '10',
   stock: '1',
+  rarity: 'common',
+  image_url: '',
+  animation_url: '',
+  background_value: '',
 };
 
 const emptyUserForm = {
@@ -26,6 +34,43 @@ const emptyUserForm = {
 function money(value) {
   const number = Number(value || 0);
   return new Intl.NumberFormat('uz-UZ').format(number);
+}
+
+
+function formatPrice(value) {
+  const number = Number(value || 0);
+  if (!Number.isFinite(number)) return '0';
+  if (number === 0) return 'FREE';
+  if (number < 100) return number.toString().replace(/\.0+$/, '');
+  return money(number);
+}
+
+function safeColor(value, fallback = '#22c55e') {
+  if (!value || typeof value !== 'string') return fallback;
+  const color = value.trim();
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if (/^rgba?\(/.test(color) || /^hsla?\(/.test(color)) return color;
+  return fallback;
+}
+
+function caseAccent(caseItem) {
+  return safeColor(caseItem?.accent_color, '#22c55e');
+}
+
+function caseBadgeColor(caseItem) {
+  return safeColor(caseItem?.badge_color, '#8b5cf6');
+}
+
+function caseBadgeText(caseItem, gifts = []) {
+  if (caseItem?.badge_text) return String(caseItem.badge_text).toUpperCase();
+  const minChance = gifts.reduce((min, gift) => Math.min(min, Number(gift.chance || 100)), 100);
+  if (minChance <= 5) return 'LIMITED';
+  if (Number(caseItem?.price || 0) === 0) return 'FREE';
+  return '';
+}
+
+function coinIcon() {
+  return '💎';
 }
 
 function groupGiftsByCase(gifts) {
@@ -169,6 +214,8 @@ export default function WebAppClient() {
   const [caseForm, setCaseForm] = useState(emptyCaseForm);
   const [caseImageFile, setCaseImageFile] = useState(null);
   const [giftForm, setGiftForm] = useState(emptyGiftForm);
+  const [giftImageFile, setGiftImageFile] = useState(null);
+  const [giftAnimationFile, setGiftAnimationFile] = useState(null);
   const [userForm, setUserForm] = useState(emptyUserForm);
 
   const giftsByCase = useMemo(() => groupGiftsByCase(gifts), [gifts]);
@@ -387,6 +434,18 @@ export default function WebAppClient() {
     return result.publicUrl;
   }
 
+
+  async function uploadGiftAsset(file, kind = 'image') {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('kind', kind);
+
+    const result = await apiFormPost('/api/admin/upload-gift-asset', formData);
+    return result.publicUrl;
+  }
+
   async function createCase(event) {
     event.preventDefault();
 
@@ -426,12 +485,21 @@ export default function WebAppClient() {
   async function createGift(event) {
     event.preventDefault();
 
-    await runAction(
-      () => apiPost('/api/admin/gift', { action: 'create', ...giftForm }),
-      'Sovg‘a qo‘shildi ✅'
-    );
+    await runAction(async () => {
+      const uploadedImageUrl = await uploadGiftAsset(giftImageFile, 'image');
+      const uploadedAnimationUrl = await uploadGiftAsset(giftAnimationFile, 'animation');
+
+      return apiPost('/api/admin/gift', {
+        action: 'create',
+        ...giftForm,
+        image_url: uploadedImageUrl || giftForm.image_url || '',
+        animation_url: uploadedAnimationUrl || giftForm.animation_url || '',
+      });
+    }, 'Sovg‘a qo‘shildi ✅');
 
     setGiftForm((current) => ({ ...emptyGiftForm, case_id: current.case_id }));
+    setGiftImageFile(null);
+    setGiftAnimationFile(null);
     await loadApp();
   }
 
@@ -595,6 +663,8 @@ export default function WebAppClient() {
             gifts={gifts}
             withdrawals={withdrawals}
             pendingWithdrawals={pendingWithdrawals}
+            isAdmin={isAdmin}
+            onOpenAdmin={() => setTab('admin')}
           />
         ) : null}
 
@@ -613,6 +683,10 @@ export default function WebAppClient() {
             setCaseImageFile={setCaseImageFile}
             giftForm={giftForm}
             setGiftForm={setGiftForm}
+            giftImageFile={giftImageFile}
+            setGiftImageFile={setGiftImageFile}
+            giftAnimationFile={giftAnimationFile}
+            setGiftAnimationFile={setGiftAnimationFile}
             userForm={userForm}
             setUserForm={setUserForm}
             busy={busy}
@@ -705,62 +779,69 @@ function NavButton({ item, active, onClick, mobile = false }) {
 }
 
 function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, withdrawals, onGoCases, onGoInventory, onOpenCase, busy }) {
-  const featuredCases = cases.slice(0, 3);
-  const recentWins = history.slice(0, 5);
+  const featuredCases = cases.slice(0, 4);
+  const liveDrops = history.slice(0, 10).map((item) => gifts.find((giftItem) => giftItem.id === item.gift_id)).filter(Boolean);
+  const topCases = cases.slice(0, 2);
 
   return (
-    <div className="screen-stack">
-      <section className="hero-section premium-card">
-        <div className="hero-copy">
-          <div className="eyebrow">Live casino style · Telegram Web App</div>
-          <h1>Case oching, sovg‘a yuting, yutuqlarni yechib oling.</h1>
-          <p>Salom, {telegramUser?.first_name || 'user'}! Balansingizni tekshiring, premium case tanlang va real-time animatsiya bilan yutuqni oling.</p>
-          <div className="hero-actions">
-            <button className="primary-btn" onClick={onGoCases}>🎁 Case ochish</button>
-            <button className="ghost-btn" onClick={onGoInventory}>💎 Inventory</button>
+    <div className="mobile-casino-home">
+      <section className="casino-home-top">
+        <div className="home-profile-balance">
+          <div className="home-avatar-wrap">
+            <div className="home-avatar">{telegramUser?.first_name?.[0] || 'U'}</div>
+            <span className="home-gear">⚙</span>
+          </div>
+          <div>
+            <span>Your balance</span>
+            <strong><b>{coinIcon()}</b> {formatPrice(profile?.balance)}</strong>
           </div>
         </div>
-        <div className="hero-visual">
-          <div className="floating-chip chip-a">💎</div>
-          <div className="floating-chip chip-b">⭐</div>
-          <div className="case-cube">
-            <span>🎁</span>
-          </div>
-          <div className="jackpot-card">
-            <span>Balance</span>
-            <strong>{money(profile?.balance)} so‘m</strong>
-          </div>
+        <button className="deposit-btn">▣ Deposit</button>
+      </section>
+
+      <section className="live-strip-card">
+        <div className="live-title"><span /> Live</div>
+        <div className="live-strip-track">
+          {(liveDrops.length ? liveDrops : gifts.slice(0, 8)).map((gift, index) => (
+            <div className="live-drop-item" key={`${gift?.id || 'gift'}-${index}`} style={{ background: gift?.background_value || undefined }}>
+              <GiftMedia gift={gift} compact />
+            </div>
+          ))}
+          {gifts.length === 0 && liveDrops.length === 0 ? [0,1,2,3,4,5].map((item) => <div className="live-drop-item" key={item}>💎</div>) : null}
         </div>
       </section>
 
-      <section className="metrics-grid">
-        <MetricCard label="Balans" value={`${money(profile?.balance)} so‘m`} icon="💰" tone="gold" />
+      <section className="promo-banners-grid">
+        <button className="promo-banner rocket" onClick={onGoCases}>
+          <span className="promo-badge">⚡ HOT!</span>
+          <strong>🚀 ROCKET</strong>
+          <small>Premium case larni oching</small>
+        </button>
+        <button className="promo-banner pvp" onClick={onGoCases}>
+          <span className="promo-badge new">🔥 NEW!</span>
+          <strong>⚔ PVP</strong>
+          <small>Omadingizni sinang</small>
+        </button>
+        <button className="mini-feature contracts" onClick={onGoInventory}>▣ CONTRACTS <span>›</span></button>
+        <button className="mini-feature upgrade" onClick={onGoCases}>↟ UPGRADE <span>›</span></button>
+      </section>
+
+      <section className="home-section-head">
+        <div><span>▱</span><strong>Daily Rewards</strong></div>
+        <button onClick={onGoCases}>Hammasi</button>
+      </section>
+
+      <section className="case-grid-market home-market-grid">
+        {featuredCases.length === 0 ? <Empty text="Hali case qo‘shilmagan." /> : null}
+        {featuredCases.map((caseItem) => (
+          <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onGoCases} />
+        ))}
+      </section>
+
+      <section className="quick-stats-row">
         <MetricCard label="Aktiv case" value={cases.length} icon="🎁" tone="cyan" />
         <MetricCard label="Yutuqlar" value={history.length} icon="🏆" tone="purple" />
         <MetricCard label="Yechishlar" value={withdrawals.length} icon="📤" tone="green" />
-      </section>
-
-      <section className="split-grid">
-        <div className="premium-card section-card">
-          <SectionTitle title="Featured cases" description="Eng so‘nggi va aktiv case lar." />
-          <div className="compact-case-list">
-            {featuredCases.length === 0 ? <Empty text="Hali case qo‘shilmagan." /> : null}
-            {featuredCases.map((caseItem) => (
-              <CompactCaseRow key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} onOpen={onOpenCase} busy={busy} />
-            ))}
-          </div>
-        </div>
-
-        <div className="premium-card section-card">
-          <SectionTitle title="Recent wins" description="Oxirgi ochilgan case natijalari." />
-          <div className="activity-list">
-            {recentWins.length === 0 ? <Empty text="Hali yutuqlar yo‘q." /> : null}
-            {recentWins.map((item) => {
-              const gift = gifts.find((giftItem) => giftItem.id === item.gift_id);
-              return <ActivityRow key={item.id} icon="✨" title={gift?.title || 'Sovg‘a'} meta={new Date(item.created_at).toLocaleString('uz-UZ')} />;
-            })}
-          </div>
-        </div>
       </section>
     </div>
   );
@@ -768,10 +849,17 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
 
 function CasesView({ cases, giftsByCase, busy, onOpenCase, onSelectCase }) {
   return (
-    <div className="screen-stack">
-      <PageHeader eyebrow="Cases" title="Premium case collection" description="Har bir case ichida chance, stock va sovg‘alar boshqariladi." />
+    <div className="screen-stack case-market-screen">
+      <section className="market-header">
+        <div>
+          <div className="eyebrow">Cases</div>
+          <h1>Case Market</h1>
+          <p>Premium giftlar, NFT-style sovg‘alar va real chance bilan case tanlang.</p>
+        </div>
+      </section>
+
       {cases.length === 0 ? <Empty text="Hali aktiv case yo‘q." /> : null}
-      <section className="case-grid-pro">
+      <section className="case-grid-market">
         {cases.map((caseItem) => (
           <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onSelectCase} />
         ))}
@@ -781,33 +869,61 @@ function CasesView({ cases, giftsByCase, busy, onOpenCase, onSelectCase }) {
 }
 
 function CaseCard({ caseItem, gifts, busy, onOpen, onDetails }) {
-  const bestGift = gifts.slice().sort((a, b) => Number(a.chance || 0) - Number(b.chance || 0))[0];
+  const accent = caseAccent(caseItem);
+  const badge = caseBadgeText(caseItem, gifts);
+  const badgeColor = caseBadgeColor(caseItem);
+  const disabled = busy || gifts.length === 0;
 
   return (
-    <article className="case-card-pro premium-card">
-      <div className="case-media-pro">
+    <article
+      className={`market-case-card ${caseItem.card_style || 'default'}`}
+      style={{ '--case-accent': accent, '--case-badge': badgeColor }}
+      onClick={() => onDetails(caseItem)}
+    >
+      <div className="market-case-art">
         {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <div className="case-placeholder">🎁</div>}
-        <div className="case-price-badge">{money(caseItem.price)} so‘m</div>
-        {bestGift ? <RarityBadge rarity={giftRarity(bestGift)} /> : null}
+        {badge ? <div className="market-case-badge">✣ {badge}</div> : null}
+        <div className="case-art-shine" />
       </div>
-      <div className="case-content-pro">
-        <div>
-          <h2>{caseItem.title}</h2>
-          <p>{caseItem.description || 'Ichida premium sovg‘alar va bonuslar mavjud.'}</p>
+      <div className="market-case-footer">
+        <div className="market-case-title">
+          <strong>{caseItem.title}</strong>
+          {gifts.length ? <span>{gifts.length} gifts</span> : <span>No gifts</span>}
         </div>
-        <div className="gift-strip">
-          {gifts.slice(0, 4).map((gift) => (
-            <span className={`gift-chip ${giftRarity(gift)}`} key={gift.id}>{gift.title}</span>
-          ))}
-          {gifts.length === 0 ? <span className="gift-chip muted">Sovg‘a yo‘q</span> : null}
-        </div>
-        <div className="card-actions">
-          <button className="primary-btn" disabled={busy || gifts.length === 0} onClick={() => onOpen(caseItem)}>Open now</button>
-          <button className="ghost-btn" onClick={() => onDetails(caseItem)}>Details</button>
-        </div>
+        <button
+          className="market-price-chip"
+          disabled={disabled}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen(caseItem);
+          }}
+        >
+          <span>{formatPrice(caseItem.price)}</span>
+          <b>{coinIcon()}</b>
+        </button>
       </div>
     </article>
   );
+}
+
+function GiftMedia({ gift, compact = false }) {
+  const mediaClass = compact ? 'gift-media compact' : 'gift-media';
+  if (!gift) return <span className={mediaClass}>💎</span>;
+
+  const animationUrl = gift.animation_url || '';
+  const imageUrl = gift.image_url || '';
+
+  if (animationUrl) {
+    return (
+      <video className={mediaClass} src={animationUrl} autoPlay muted loop playsInline />
+    );
+  }
+
+  if (imageUrl) {
+    return <img className={mediaClass} src={imageUrl} alt={gift.title || 'Gift'} />;
+  }
+
+  return <span className={mediaClass}>{giftIcon(gift)}</span>;
 }
 
 function CompactCaseRow({ caseItem, gifts, onOpen, busy }) {
@@ -854,7 +970,7 @@ function InventoryView({ history, gifts, cases, withdrawals, busy, onWithdraw })
   );
 }
 
-function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gifts, withdrawals, pendingWithdrawals }) {
+function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gifts, withdrawals, pendingWithdrawals, isAdmin, onOpenAdmin }) {
   return (
     <div className="screen-stack">
       <PageHeader eyebrow="Profile" title="Account overview" description="Telegram profilingiz, balans va faoliyat statistikasi." />
@@ -865,7 +981,10 @@ function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gif
             <h2>{telegramUser?.first_name || 'Telegram user'}</h2>
             <p>{telegramUser?.username ? `@${telegramUser.username}` : `ID: ${telegramUser?.id || '-'}`}</p>
           </div>
-          <BalancePill balance={profile?.balance} />
+          <div className="profile-actions-box">
+            <BalancePill balance={profile?.balance} />
+            {isAdmin ? <button className="admin-profile-btn" onClick={onOpenAdmin}>👑 Admin Panel</button> : null}
+          </div>
         </div>
 
         <div className="metrics-grid nested">
@@ -907,7 +1026,8 @@ function AdminView(props) {
   const {
     adminTab, setAdminTab, cases, gifts, giftsByCase, adminUsers, adminWithdrawals,
     caseForm, setCaseForm, caseImageFile, setCaseImageFile,
-    giftForm, setGiftForm, userForm, setUserForm, busy,
+    giftForm, setGiftForm, giftImageFile, setGiftImageFile, giftAnimationFile, setGiftAnimationFile,
+    userForm, setUserForm, busy,
     createCase, updateCase, deleteCase, createGift, updateGift, deleteGift,
     addBalance, toggleBan, loadAdminUsers, loadAdminWithdrawals, updateWithdrawal,
     adminPendingWithdrawals,
@@ -965,7 +1085,12 @@ function AdminView(props) {
             <SectionTitle title="Case qo‘shish" description="URL emas, rasmni to‘g‘ridan-to‘g‘ri upload qiling." />
             <FileInput label="Case rasmi" file={caseImageFile} onChange={setCaseImageFile} />
             <Input label="Case nomi" value={caseForm.title} onChange={(value) => setCaseForm({ ...caseForm, title: value })} placeholder="Premium Case" />
-            <Input label="Narxi" type="number" value={caseForm.price} onChange={(value) => setCaseForm({ ...caseForm, price: value })} placeholder="5000" />
+            <Input label="Narxi" type="number" value={caseForm.price} onChange={(value) => setCaseForm({ ...caseForm, price: value })} placeholder="3.5 yoki 5000" />
+            <div className="two-fields">
+              <Input label="Badge" value={caseForm.badge_text} onChange={(value) => setCaseForm({ ...caseForm, badge_text: value })} placeholder="LIMITED / HOT / NEW" />
+              <Input label="Accent color" value={caseForm.accent_color} onChange={(value) => setCaseForm({ ...caseForm, accent_color: value })} placeholder="#22c55e" />
+            </div>
+            <Input label="Badge color" value={caseForm.badge_color} onChange={(value) => setCaseForm({ ...caseForm, badge_color: value })} placeholder="#f6b7b1" />
             <Textarea label="Izoh" value={caseForm.description} onChange={(value) => setCaseForm({ ...caseForm, description: value })} placeholder="Case haqida qisqa izoh" />
             <button className="primary-btn full" disabled={busy}>Case saqlash</button>
           </form>
@@ -976,13 +1101,22 @@ function AdminView(props) {
                 <div className="admin-thumb">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : '🎁'}</div>
                 <div className="admin-item-main">
                   <strong>{caseItem.title}</strong>
-                  <span>{money(caseItem.price)} so‘m · {(giftsByCase[caseItem.id] || []).length} sovg‘a · {caseItem.is_active ? 'Aktiv' : 'Yashirilgan'}</span>
+                  <span>{formatPrice(caseItem.price)} 💎 · {(giftsByCase[caseItem.id] || []).length} sovg‘a · {caseItem.is_active ? 'Aktiv' : 'Yashirilgan'}</span>
+                  {caseItem.badge_text ? <small className="admin-case-badge" style={{ background: caseBadgeColor(caseItem) }}>{caseItem.badge_text}</small> : null}
                 </div>
                 <div className="admin-actions">
                   <button className="ghost-btn small" onClick={() => {
                     const newPrice = prompt('Yangi narx:', String(caseItem.price || 0));
                     if (newPrice !== null) updateCase(caseItem, { price: newPrice });
                   }}>Narx</button>
+                  <button className="ghost-btn small" onClick={() => {
+                    const newBadge = prompt('Badge text:', String(caseItem.badge_text || ''));
+                    if (newBadge !== null) updateCase(caseItem, { badge_text: newBadge });
+                  }}>Badge</button>
+                  <button className="ghost-btn small" onClick={() => {
+                    const newAccent = prompt('Accent color:', String(caseItem.accent_color || '#22c55e'));
+                    if (newAccent !== null) updateCase(caseItem, { accent_color: newAccent });
+                  }}>Rang</button>
                   <button className="ghost-btn small" onClick={() => updateCase(caseItem, { is_active: !caseItem.is_active })}>{caseItem.is_active ? 'Yashirish' : 'Aktiv'}</button>
                   <button className="danger-btn small" onClick={() => deleteCase(caseItem.id)}>O‘chirish</button>
                 </div>
@@ -996,7 +1130,9 @@ function AdminView(props) {
       {adminTab === 'gifts' ? (
         <div className="admin-workspace">
           <form className="manager-form premium-card" onSubmit={createGift}>
-            <SectionTitle title="Sovg‘a qo‘shish" description="Sovg‘ani qaysi casega tushishini, chance va stock bilan belgilang." />
+            <SectionTitle title="Sovg‘a qo‘shish" description="Har sovg‘aga alohida WEBP/WEBM asset va fon qo‘shing." />
+            <FileInput label="Gift WEBP/PNG rasmi" file={giftImageFile} onChange={setGiftImageFile} accept="image/png,image/jpeg,image/webp,image/gif" helper="WEBP tavsiya qilinadi · max 8MB" />
+            <FileInput label="Gift WEBM/MP4 animatsiya" file={giftAnimationFile} onChange={setGiftAnimationFile} accept="video/webm,video/mp4" helper="WEBM yoki MP4 · max 8MB" />
             <Select label="Qaysi casega?" value={giftForm.case_id} onChange={(value) => setGiftForm({ ...giftForm, case_id: value })}>
               <option value="">Case tanlang</option>
               {cases.map((caseItem) => <option value={caseItem.id} key={caseItem.id}>{caseItem.title}</option>)}
@@ -1008,13 +1144,21 @@ function AdminView(props) {
               <Input label="Chance %" type="number" value={giftForm.chance} onChange={(value) => setGiftForm({ ...giftForm, chance: value })} placeholder="10" />
               <Input label="Stock" type="number" value={giftForm.stock} onChange={(value) => setGiftForm({ ...giftForm, stock: value })} placeholder="5" />
             </div>
+            <Select label="Rarity" value={giftForm.rarity} onChange={(value) => setGiftForm({ ...giftForm, rarity: value })}>
+              <option value="common">Common</option>
+              <option value="rare">Rare</option>
+              <option value="epic">Epic</option>
+              <option value="legendary">Legendary</option>
+              <option value="mythic">Mythic</option>
+            </Select>
+            <Input label="Gift foni" value={giftForm.background_value} onChange={(value) => setGiftForm({ ...giftForm, background_value: value })} placeholder="linear-gradient(135deg,#ffc400,#23c59a)" />
             <button className="primary-btn full" disabled={busy}>Sovg‘a saqlash</button>
           </form>
 
           <div className="manager-list">
             {gifts.map((gift) => (
               <div className={`admin-item premium-card rarity-left ${giftRarity(gift)}`} key={gift.id}>
-                <div className="gift-symbol">{giftIcon(gift)}</div>
+                <div className="gift-symbol gift-admin-symbol" style={{ background: gift.background_value || undefined }}><GiftMedia gift={gift} compact /></div>
                 <div className="admin-item-main">
                   <strong>{gift.title}</strong>
                   <span>{cases.find((item) => item.id === gift.case_id)?.title || 'Case'} · {gift.chance}% · Stock: {gift.stock}</span>
@@ -1101,31 +1245,51 @@ function AdminView(props) {
 }
 
 function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
+  const accent = caseAccent(caseItem);
+  const badge = caseBadgeText(caseItem, gifts);
+  const livePreview = gifts.slice(0, 8);
+
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
-      <article className="case-modal premium-card" onMouseDown={(event) => event.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>×</button>
-        <div className="modal-case-hero">
-          {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <span>🎁</span>}
+      <article className="case-detail-sheet" style={{ '--case-accent': accent, '--case-badge': caseBadgeColor(caseItem) }} onMouseDown={(event) => event.stopPropagation()}>
+        <button className="close-btn market-close" onClick={onClose}>×</button>
+        <div className="case-detail-top">
+          <div className="daily-label"><span>▣</span> {badge || 'DAILY BOX'}</div>
+          <div className="latest-drops">Latest TOP drops <i /> <i /> <i /></div>
         </div>
-        <div className="modal-content">
+
+        <div className="case-detail-feature">
+          <div className="case-detail-thumb">
+            {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <span>🎁</span>}
+          </div>
           <div>
-            <div className="eyebrow">Case details</div>
+            <span className="hot-pill">● HOT</span>
             <h2>{caseItem.title}</h2>
-            <p>{caseItem.description || 'Ichidagi sovg‘alar chance bo‘yicha tanlanadi.'}</p>
+            <strong>{formatPrice(caseItem.price)} {coinIcon()}</strong>
+            <p>{caseItem.description || 'Bu case ichida premium sovg‘alar, bonuslar va chance bo‘yicha yutuqlar bor.'}</p>
           </div>
-          <div className="modal-price">{money(caseItem.price)} so‘m</div>
-          <div className="gift-detail-grid">
-            {gifts.map((gift) => (
-              <div className={`gift-detail ${giftRarity(gift)}`} key={gift.id}>
-                <span>{giftIcon(gift)}</span>
-                <strong>{gift.title}</strong>
-                <small>{gift.chance}% · Stock: {gift.stock}</small>
-              </div>
-            ))}
-            {gifts.length === 0 ? <Empty text="Bu casega hali sovg‘a qo‘shilmagan." /> : null}
-          </div>
-          <button className="primary-btn full" disabled={busy || gifts.length === 0} onClick={onOpen}>Open case</button>
+        </div>
+
+        <div className="case-preview-reel">
+          <div className="case-preview-pointer" />
+          {(livePreview.length ? livePreview : gifts).map((gift, index) => (
+            <div className={`preview-reel-item ${giftRarity(gift)}`} key={`${gift.id}-${index}`} style={{ background: gift.background_value || undefined }}>
+              <GiftMedia gift={gift} />
+            </div>
+          ))}
+          {gifts.length === 0 ? <Empty text="Bu casega hali sovg‘a qo‘shilmagan." /> : null}
+        </div>
+
+        <button className="open-big-btn" disabled={busy || gifts.length === 0} onClick={onOpen}>🎁 Open {caseItem.title}</button>
+
+        <div className="case-prize-grid">
+          {gifts.map((gift) => (
+            <div className={`prize-card ${giftRarity(gift)}`} key={gift.id} style={{ background: gift.background_value || undefined }}>
+              <GiftMedia gift={gift} />
+              <strong>{gift.title}</strong>
+              <small>{gift.chance}% · Stock: {gift.stock}</small>
+            </div>
+          ))}
         </div>
       </article>
     </div>
@@ -1278,20 +1442,23 @@ function giftIcon(gift) {
   return '💎';
 }
 
-function FileInput({ label, file, onChange }) {
+function FileInput({ label, file, onChange, accept = 'image/png,image/jpeg,image/webp,image/gif', helper = 'PNG, JPG, WEBP yoki GIF · max 4MB' }) {
   const previewUrl = file ? URL.createObjectURL(file) : '';
+  const isVideo = file?.type?.startsWith('video/');
 
   return (
     <label className="upload-field">
       <span>{label}</span>
       <input
         type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif"
+        accept={accept}
         onChange={(event) => onChange(event.target.files?.[0] || null)}
       />
       <div className="upload-box">
-        {previewUrl ? <img src={previewUrl} alt="Preview" /> : <strong>Rasm tanlash</strong>}
-        <small>{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PNG, JPG, WEBP yoki GIF · max 4MB'}</small>
+        {previewUrl && isVideo ? <video src={previewUrl} autoPlay muted loop playsInline /> : null}
+        {previewUrl && !isVideo ? <img src={previewUrl} alt="Preview" /> : null}
+        {!previewUrl ? <strong>Fayl tanlash</strong> : null}
+        <small>{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : helper}</small>
       </div>
     </label>
   );
