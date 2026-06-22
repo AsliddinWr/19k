@@ -43,7 +43,7 @@ export async function POST(request) {
     if (!auth.isAdmin) return jsonError('Admin ruxsati yo‘q', 403);
 
     const supabase = getSupabaseAdmin();
-    const { action, giftId, case_id, title, type, value, chance, stock, is_active } = auth.body || {};
+    const { action, giftId, case_id, title, type, value, chance, stock, is_active, image_url, animation_url, background_value, rarity } = auth.body || {};
 
     if (action === 'list') {
       const { data, error } = await supabase
@@ -87,6 +87,10 @@ export async function POST(request) {
           value: value || null,
           chance: numericChance,
           stock: numericStock,
+          image_url: image_url || null,
+          animation_url: animation_url || null,
+          background_value: background_value || null,
+          rarity: rarity || 'common',
           is_active: true,
         })
         .select('*')
@@ -137,6 +141,10 @@ export async function POST(request) {
       if (value !== undefined) updates.value = value || null;
       if (chance !== undefined) updates.chance = nextChance;
       if (stock !== undefined) updates.stock = nextStock;
+      if (image_url !== undefined) updates.image_url = image_url || null;
+      if (animation_url !== undefined) updates.animation_url = animation_url || null;
+      if (background_value !== undefined) updates.background_value = background_value || null;
+      if (rarity !== undefined) updates.rarity = rarity || 'common';
       if (is_active !== undefined) updates.is_active = Boolean(is_active);
 
       const { data, error } = await supabase
