@@ -911,6 +911,27 @@ function NavButton({ item, active, onClick, mobile = false }) {
   );
 }
 
+
+function PromoMedia({ src, icon }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <span className="promo-banner-fallback" aria-hidden="true">
+        <AppIcon name={icon} />
+      </span>
+    );
+  }
+
+  return (
+    <span className="promo-banner-media" aria-hidden="true">
+      <video autoPlay loop muted playsInline preload="metadata" onError={() => setFailed(true)}>
+        <source src={src} type="video/webm" />
+      </video>
+    </span>
+  );
+}
+
 function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, withdrawals, onGoCases, onGoInventory, onOpenCase, onSelectCase, busy }) {
   const featuredCases = cases;
   const liveDrops = history.slice(0, 10).map((item) => gifts.find((giftItem) => giftItem.id === item.gift_id)).filter(Boolean);
@@ -946,14 +967,20 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
 
       <section className="promo-banners-grid">
         <button className="promo-banner rocket" onClick={onGoCases}>
+          <PromoMedia src={process.env.NEXT_PUBLIC_ROCKET_WEBM_URL || '/animations/rocket.webm'} icon="rocket" />
           <span className="promo-badge"><AppIcon name="spark" /> HOT!</span>
-          <strong><AppIcon name="rocket" /> ROCKET</strong>
-          <small>Premium game larni oching</small>
+          <span className="promo-banner-text">
+            <strong>ROCKET</strong>
+            <small>Premium game larni oching</small>
+          </span>
         </button>
         <button className="promo-banner pvp" onClick={onGoCases}>
+          <PromoMedia src={process.env.NEXT_PUBLIC_PVP_WEBM_URL || '/animations/pvp.webm'} icon="swords" />
           <span className="promo-badge new"><AppIcon name="spark" /> NEW!</span>
-          <strong><AppIcon name="swords" /> PVP</strong>
-          <small>Omadingizni sinang</small>
+          <span className="promo-banner-text">
+            <strong>PVP</strong>
+            <small>Omadingizni sinang</small>
+          </span>
         </button>
         <button className="mini-feature contracts" onClick={onGoInventory}><AppIcon name="inventory" /> CONTRACTS <span>›</span></button>
         <button className="mini-feature upgrade" onClick={onGoCases}><AppIcon name="spark" /> UPGRADE <span>›</span></button>
