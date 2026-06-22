@@ -9,7 +9,7 @@ export async function POST(request) {
     if (!auth.isAdmin) return jsonError('Admin ruxsati yo‘q', 403);
 
     const supabase = getSupabaseAdmin();
-    const { action, caseId, title, description, price, image_url, is_active } = auth.body || {};
+    const { action, caseId, title, description, price, image_url, is_active, badge_text, badge_color, accent_color, card_style } = auth.body || {};
 
     if (action === 'list') {
       const { data, error } = await supabase
@@ -33,6 +33,10 @@ export async function POST(request) {
           description: description || null,
           price: Number(price || 0),
           image_url: image_url || null,
+          badge_text: badge_text ? String(badge_text).trim().toUpperCase() : null,
+          badge_color: badge_color || '#8b5cf6',
+          accent_color: accent_color || '#22c55e',
+          card_style: card_style || 'default',
           is_active: true,
         })
         .select('*')
@@ -50,6 +54,10 @@ export async function POST(request) {
       if (description !== undefined) updates.description = description || null;
       if (price !== undefined) updates.price = Number(price || 0);
       if (image_url !== undefined) updates.image_url = image_url || null;
+      if (badge_text !== undefined) updates.badge_text = badge_text ? String(badge_text).trim().toUpperCase() : null;
+      if (badge_color !== undefined) updates.badge_color = badge_color || '#8b5cf6';
+      if (accent_color !== undefined) updates.accent_color = accent_color || '#22c55e';
+      if (card_style !== undefined) updates.card_style = card_style || 'default';
       if (is_active !== undefined) updates.is_active = Boolean(is_active);
 
       const { data, error } = await supabase
