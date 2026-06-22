@@ -4021,3 +4021,279 @@ span.gift-media {
     flex: 1;
   }
 }
+
+/* Gift Catalog System polish */
+.gift-catalog-app .full-width-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mini-orb {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 25%, #fff 0 8%, #38bdf8 9% 24%, #2563eb 25% 58%, #081224 59% 100%);
+  box-shadow: 0 0 28px rgba(56, 189, 248, .45), inset 0 0 18px rgba(255,255,255,.2);
+  animation: miniOrbPulse 1.8s ease-in-out infinite;
+}
+
+.mini-orb.small { width: 28px; height: 28px; }
+
+@keyframes miniOrbPulse { 0%,100%{ transform: scale(1); opacity:.9 } 50%{ transform: scale(.82); opacity:1 } }
+
+.catalog-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+}
+
+.catalog-toolbar h3 { margin: 0 0 6px; }
+.catalog-toolbar p { margin: 0; color: var(--text-soft, #9fb0d0); }
+
+.catalog-grid,
+.gift-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 760px) {
+  .catalog-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .gift-picker-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: 520px; overflow: auto; padding-right: 4px; }
+}
+
+.telegram-gift-card,
+.gift-picker-card {
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 22px;
+  padding: 12px;
+  background: rgba(255,255,255,.05);
+  color: #fff;
+  text-align: center;
+  display: grid;
+  gap: 8px;
+  transition: .2s ease;
+}
+
+.gift-picker-card { cursor: pointer; }
+.gift-picker-card.active,
+.gift-picker-card:hover {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,.22), 0 18px 38px rgba(0,0,0,.25);
+  transform: translateY(-2px);
+}
+
+.telegram-gift-media,
+.gift-picker-card > div,
+.catalog-gift-media,
+.reward-mini {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.telegram-gift-media,
+.gift-picker-card > div {
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+}
+
+.telegram-gift-card strong,
+.gift-picker-card strong {
+  font-size: 13px;
+  line-height: 1.2;
+  min-height: 32px;
+}
+
+.telegram-gift-card span,
+.gift-picker-card span {
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.gift-media {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  display: block;
+}
+
+.gift-media-icon {
+  width: 52%;
+  height: 52%;
+  stroke: #fff;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 8px 15px rgba(0,0,0,.35));
+}
+
+.segmented-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+}
+
+.segmented-control button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px;
+  background: transparent;
+  color: var(--text-soft, #9fb0d0);
+  font-weight: 900;
+}
+
+.segmented-control button.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(34,197,94,.25);
+}
+
+.selected-gift-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.reward-mini {
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  flex: 0 0 62px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.28);
+}
+
+.catalog-gift-card {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.catalog-gift-card.not-ready { opacity: .72; border-color: rgba(255,92,122,.35); }
+.catalog-gift-media { width: 70px; height: 70px; border-radius: 16px; }
+.catalog-gift-info { display: grid; gap: 4px; }
+.catalog-gift-info strong { color: #fff; }
+.catalog-gift-info span { color: var(--text-soft, #9fb0d0); font-size: 13px; }
+.ready-badge { font-size: 11px; font-weight: 900; color: #ff5c7a; }
+.ready-badge.ok { color: #22c55e; }
+
+.chance-helper {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  color: var(--text-soft, #9fb0d0);
+  font-size: 13px;
+}
+.chance-helper b { color: #fff; }
+.quick-chances { display: flex; flex-wrap: wrap; gap: 8px; }
+.quick-chances button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(34,197,94,.14);
+  color: #8af5b3;
+  font-weight: 900;
+}
+
+.games-empty {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 28px;
+}
+.games-empty .app-icon { width: 64px; height: 64px; stroke: #8b5cf6; }
+.games-empty p { color: var(--text-soft, #9fb0d0); max-width: 360px; }
+
+.case-gift-grid,
+.inventory-grid {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 700px) {
+  .case-gift-grid,
+  .inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+.history-row span { color: var(--text-soft, #9fb0d0); font-size: 12px; }
+.history-row b { color: #22c55e; }
+
+.opening-reel-window,
+.reel-preview {
+  position: relative;
+  overflow: hidden;
+}
+
+.reel-static-row {
+  display: flex;
+  gap: 12px;
+  overflow: auto;
+  padding: 16px;
+}
+
+.opening-reel-track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  padding: 20px;
+  animation: proCaseRoll 3.4s cubic-bezier(.12,.78,.12,1) forwards;
+}
+
+.opening-reel-cell .reward-mini { width: 84px; height: 84px; border-radius: 18px; }
+
+@keyframes proCaseRoll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-2180px); }
+}
+
+.win-preview {
+  width: min(260px, 68vw);
+  height: min(260px, 68vw);
+  border-radius: 34px;
+  margin: 18px auto;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 60px rgba(139,92,246,.35), inset 0 0 0 1px rgba(255,255,255,.16);
+}
+
+.win-preview .gift-media { width: 92%; height: 92%; }
+
+.field-label select {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.field-label select option { color: #111; }
+
+@media (max-width: 560px) {
+  .catalog-gift-card { grid-template-columns: 58px 1fr; }
+  .catalog-gift-media { width: 58px; height: 58px; }
+  .catalog-gift-card .admin-actions { grid-column: 1 / -1; }
+  .catalog-toolbar { display: grid; }
+}
