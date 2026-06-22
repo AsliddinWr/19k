@@ -176,6 +176,7 @@ export async function POST(request) {
       balanceAfter: toNumber(updatedUser.balance),
       price: casePrice,
       history,
+      reelPool: gifts.map(publicGift),
       opening: {
         totalChance,
         poolSize: gifts.length,
