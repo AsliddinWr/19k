@@ -740,10 +740,12 @@ export default function WebAppClient() {
       </aside>
 
       <section className="app-main">
-        <header className="mobile-top premium-card">
-          <Brand appName={appName} compact />
-          <BalancePill balance={profile?.balance} />
-        </header>
+        {tab !== 'home' ? (
+          <header className="mobile-top premium-card">
+            <Brand appName={appName} compact />
+            <BalancePill balance={profile?.balance} />
+          </header>
+        ) : null}
 
         {tab === 'home' ? (
           <HomeView
@@ -922,29 +924,32 @@ function PromoImageCard({ variant, image, badge, badgeIcon, title, subtitle, fal
       onClick={onClick}
       aria-label={`${title}. ${subtitle}`}
     >
-      {!failed ? (
-        <img
-          className="promo-banner-webp"
-          src={image}
-          alt=""
-          loading="eager"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <>
-          <span className={`promo-badge ${variant === 'pvp' ? 'new' : ''}`}>
-            <AppIcon name={badgeIcon} /> {badge}
-          </span>
-          <span className="promo-banner-fallback" aria-hidden="true">
+      <div className="promo-banner-copy">
+        <span className={`promo-badge ${variant === 'pvp' ? 'new' : ''}`}>
+          <AppIcon name={badgeIcon} /> {badge}
+        </span>
+        <span className="promo-banner-text">
+          <strong>{title}</strong>
+          <small>{subtitle}</small>
+        </span>
+      </div>
+
+      <span className="promo-banner-side" aria-hidden="true">
+        {!failed ? (
+          <img
+            className="promo-banner-webp"
+            src={image}
+            alt=""
+            loading="eager"
+            decoding="async"
+            onError={() => setFailed(true)}
+          />
+        ) : (
+          <span className="promo-banner-fallback">
             <AppIcon name={fallbackIcon} />
           </span>
-          <span className="promo-banner-text">
-            <strong>{title}</strong>
-            <small>{subtitle}</small>
-          </span>
-        </>
-      )}
+        )}
+      </span>
     </button>
   );
 }
