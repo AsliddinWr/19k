@@ -691,17 +691,22 @@ export default function WebAppClient() {
   }
 
   async function syncMarketNftGifts() {
+    const source = marketGiftForm.source || 'giftasset';
     const payload = {
-      source: marketGiftForm.source || 'portals',
+      source,
       giftNames: marketGiftForm.giftNames || '',
       pages: Number(marketGiftForm.pages || 3),
       limit: Number(marketGiftForm.limit || 20),
       json_url: marketGiftForm.json_url || '',
     };
 
+    if (source === 'json' && !String(payload.json_url || '').trim()) {
+      throw new Error('Custom JSON URL tanlanganda JSON URL majburiy.');
+    }
+
     await runAction(
-      () => apiPost('/api/admin/sync-market-nft-gifts', payload),
-      'Marketplace NFT giftlar catalogga qo‘shildi ✅'
+      () => apiPost(source === 'json' ? '/api/admin/import-gifts-json' : '/api/admin/sync-market-nft-gifts', payload),
+      source === 'json' ? 'JSON URL giftlar catalogga qo‘shildi ✅' : 'Marketplace NFT giftlar catalogga qo‘shildi ✅'
     );
     await loadApp();
   }
@@ -1718,6 +1723,13 @@ function AdminView(props) {
               {marketGiftForm.source === 'json' ? (
                 <Input label="JSON URL" value={marketGiftForm.json_url} onChange={(value) => setMarketGiftForm({ ...marketGiftForm, json_url: value })} placeholder="https://.../nft-gifts.json" />
               ) : null}
+            </div>
+            <div className="market-sync-actions">
+              <button className="primary-btn" type="button" disabled={busy} onClick={syncMarketNftGifts}>
+                <AppIcon name={marketGiftForm.source === 'json' ? 'gift' : 'gem'} />
+                {marketGiftForm.source === 'json' ? 'Import JSON URL' : 'Sync Market NFT'}
+              </button>
+              {marketGiftForm.source === 'json' ? <span>JSON ichidagi giftlar catalogga tushadi, keyin Case Rewards’da tanlanadi.</span> : null}
             </div>
             <small>GiftAsset ishlashi uchun Vercel env’da <b>GIFTASSET_API_KEY</b> kerak. Portals uchun <b>PORTALS_AUTH_DATA</b>, JSON source uchun <b>NFT_GIFTS_JSON_URL</b> ishlatiladi.</small>
           </div>
