@@ -50,6 +50,36 @@ function delay(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+function randomItem(items) {
+  if (!items.length) return null;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function buildOpeningReel(gifts, winningGift) {
+  const safeGifts = gifts.length ? gifts : [winningGift].filter(Boolean);
+  const reel = [];
+
+  for (let index = 0; index < 30; index += 1) {
+    reel.push(randomItem(safeGifts));
+  }
+
+  if (winningGift) {
+    reel.push(winningGift);
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    reel.push(randomItem(safeGifts));
+  }
+
+  return reel.filter(Boolean);
+}
+
+function chanceSum(gifts) {
+  return gifts
+    .filter((gift) => gift.is_active !== false)
+    .reduce((sum, gift) => sum + Number(gift.chance || 0), 0);
+}
+
 const HEX_CELLS = [
   ['center', 0, 0, 0],
   ['r1', -32, 0, 0.15],
@@ -274,13 +304,27 @@ export default function WebAppClient() {
 
   async function openCase(caseItem) {
     const caseGifts = giftsByCase[caseItem.id] || [];
-    if (caseGifts.length === 0) {
-      setError('Bu case ichida aktiv sovg‘a yo‘q.');
+    const activeGiftPool = caseGifts.filter((gift) => gift.is_active !== false && Number(gift.stock || 0) > 0 && Number(gift.chance || 0) > 0);
+
+    if (activeGiftPool.length === 0) {
+      setError('Bu case ichida aktiv, stock bor sovg‘a yo‘q.');
+      return;
+    }
+
+    if (Number(profile?.balance || 0) < Number(caseItem.price || 0)) {
+      setError(`Balans yetarli emas. Kerak: ${money(caseItem.price)} so‘m`);
+      tg?.HapticFeedback?.notificationOccurred?.('error');
       return;
     }
 
     setSelectedCase(null);
-    setOpening({ stage: 'rolling', caseItem, gift: null });
+    setOpening({
+      stage: 'preparing',
+      caseItem,
+      gift: null,
+      reel: buildOpeningReel(activeGiftPool, null),
+      spinKey: Date.now(),
+    });
 
     const result = await runAction(
       () => apiPost('/api/open-case', { caseId: caseItem.id }),
@@ -292,9 +336,36 @@ export default function WebAppClient() {
       return;
     }
 
-    await delay(950);
-    setOpening({ stage: 'result', caseItem, gift: result.gift });
-    setProfile((current) => ({ ...current, balance: result.balance }));
+    const reel = buildOpeningReel(activeGiftPool, result.gift);
+
+    setOpening({
+      stage: 'rolling',
+      caseItem,
+      gift: result.gift,
+      reel,
+      opening: result.opening,
+      balanceBefore: result.balanceBefore,
+      balanceAfter: result.balanceAfter,
+      spinKey: Date.now(),
+    });
+
+    setProfile((current) => ({ ...current, balance: result.balanceAfter ?? result.balance }));
+    tg?.HapticFeedback?.impactOccurred?.('medium');
+
+    await delay(3600);
+
+    setOpening({
+      stage: 'result',
+      caseItem,
+      gift: result.gift,
+      reel,
+      opening: result.opening,
+      balanceBefore: result.balanceBefore,
+      balanceAfter: result.balanceAfter,
+      spinKey: Date.now(),
+    });
+
+    tg?.HapticFeedback?.notificationOccurred?.('success');
     await loadApp();
   }
 
@@ -1062,37 +1133,75 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
 }
 
 function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
-  const { stage, gift, caseItem } = opening;
+  const { stage, gift, caseItem, reel = [], spinKey, opening: openingMeta, balanceBefore, balanceAfter } = opening;
+  const activeReel = reel.length ? reel : buildOpeningReel(gifts, gift);
+  const isSpinning = stage === 'preparing' || stage === 'rolling';
+  const reelDistance = Math.max(0, (activeReel.length - 4) * 126);
 
   return (
     <div className="modal-backdrop opening-backdrop">
-      <article className="opening-modal premium-card">
-        {stage === 'rolling' ? (
+      <article className={`opening-modal premium-card ${stage === 'result' ? `result-${giftRarity(gift)}` : ''}`}>
+        {isSpinning ? (
           <>
-            <div className="eyebrow">Opening {caseItem.title}</div>
-            <h2>Omad g‘ildiragi aylanmoqda...</h2>
-            <div className="reel-window">
-              <div className="reel-track">
-                {[...gifts, ...gifts, ...gifts, ...gifts].slice(0, 20).map((item, index) => (
-                  <div className={`reel-item ${giftRarity(item)}`} key={`${item.id}-${index}`}>{giftIcon(item)}</div>
+            <div className="opening-topline">
+              <span className="eyebrow">Opening {caseItem.title}</span>
+              <strong>{money(caseItem.price)} so‘m</strong>
+            </div>
+            <h2>{stage === 'preparing' ? 'Server natijani tayyorlamoqda...' : 'Omad g‘ildiragi aylanmoqda...'}</h2>
+            <div className="pro-reel-shell">
+              <div className="reel-center-line">◆</div>
+              <div
+                key={spinKey}
+                className={`pro-reel-track ${stage === 'rolling' ? 'is-rolling' : 'is-preparing'}`}
+                style={{ '--reel-distance': `${reelDistance}px` }}
+              >
+                {activeReel.map((item, index) => (
+                  <div className={`pro-reel-item ${giftRarity(item)}`} key={`${item?.id || 'gift'}-${index}`}>
+                    <span>{giftIcon(item)}</span>
+                    <strong>{item?.title || 'Sovg‘a'}</strong>
+                    <small>{Number(item?.chance || 0)}%</small>
+                  </div>
                 ))}
               </div>
-              <div className="reel-pointer" />
             </div>
-            <p>Natija hozir chiqadi. Iltimos kuting.</p>
+            <div className="opening-info-row">
+              <span>🎯 Server random</span>
+              <span>📦 Stock nazorat</span>
+              <span>🔐 Secure logic</span>
+            </div>
+            <p>Natija serverda tanlanadi. Animatsiya faqat chiroyli ko‘rsatish uchun.</p>
           </>
         ) : (
           <>
             <button className="close-btn" onClick={onClose}>×</button>
             <div className={`win-result ${giftRarity(gift)}`}>
-              <div className="win-spark">✦</div>
+              <div className="win-confetti">
+                <span>✦</span><span>◆</span><span>✧</span><span>●</span><span>✦</span>
+              </div>
+              <div className="win-spark">JACKPOT HIT</div>
               <div className="win-gift">{giftIcon(gift)}</div>
               <RarityBadge rarity={giftRarity(gift)} />
               <h2>{gift?.title}</h2>
-              <p>Tabriklaymiz! Sovg‘a inventory’ga tushdi.</p>
+              <p>Tabriklaymiz! Sovg‘a inventory’ga tushdi va tarixga yozildi.</p>
+
+              <div className="win-stats">
+                <div>
+                  <span>Balance oldin</span>
+                  <strong>{money(balanceBefore)} so‘m</strong>
+                </div>
+                <div>
+                  <span>Balance hozir</span>
+                  <strong>{money(balanceAfter)} so‘m</strong>
+                </div>
+                <div>
+                  <span>Chance pool</span>
+                  <strong>{Number(openingMeta?.totalChance || 0)}%</strong>
+                </div>
+              </div>
+
               <div className="win-actions">
                 <button className="primary-btn" disabled={busy} onClick={onOpenAgain}>Yana ochish</button>
-                <button className="ghost-btn" onClick={onClose}>Yopish</button>
+                <button className="ghost-btn" onClick={onClose}>Inventoryga o‘tish</button>
               </div>
             </div>
           </>
