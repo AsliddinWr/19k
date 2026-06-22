@@ -201,6 +201,8 @@ function AppIcon({ name, className = '' }) {
       return <svg {...common}><path d="M4 10.6 12 4l8 6.6V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.4Z"/><path d="M3 11.2 12 3l9 8.2"/></svg>;
     case 'cases':
       return <svg {...common}><path d="M5 8h14v12H5V8Z"/><path d="M7 8V6.8A2.8 2.8 0 0 1 9.8 4h4.4A2.8 2.8 0 0 1 17 6.8V8"/><path d="M5 12h14M12 8v12"/></svg>;
+    case 'games':
+      return <svg {...common}><rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 11v4M6 13h4"/><path d="M15.5 12h.01M18 14h.01"/><path d="M9 8l1.2-3h3.6L15 8"/></svg>;
     case 'inventory':
       return <svg {...common}><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>;
     case 'history':
@@ -276,7 +278,7 @@ export default function WebAppClient() {
   const adminPendingWithdrawals = adminWithdrawals.filter((item) => item.status === 'pending').length;
 
   const navItems = useMemo(() => ([
-    { id: 'cases', icon: 'cases', label: 'Cases' },
+    { id: 'games', icon: 'games', label: 'Games' },
     { id: 'inventory', icon: 'inventory', label: 'Inventory' },
     { id: 'home', icon: 'home', label: 'Home', center: true },
     { id: 'history', icon: 'history', label: 'History' },
@@ -672,14 +674,14 @@ export default function WebAppClient() {
             history={history}
             gifts={gifts}
             withdrawals={withdrawals}
-            onGoCases={() => setTab('cases')}
+            onGoCases={() => setTab('games')}
             onGoInventory={() => setTab('inventory')}
             onOpenCase={openCase}
             busy={busy}
           />
         ) : null}
 
-        {tab === 'cases' ? (
+        {tab === 'games' ? (
           <CasesView
             cases={activeCases}
             giftsByCase={giftsByCase}
@@ -871,7 +873,7 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
         <button className="promo-banner rocket" onClick={onGoCases}>
           <span className="promo-badge"><AppIcon name="spark" /> HOT!</span>
           <strong><AppIcon name="rocket" /> ROCKET</strong>
-          <small>Premium case larni oching</small>
+          <small>Premium game larni oching</small>
         </button>
         <button className="promo-banner pvp" onClick={onGoCases}>
           <span className="promo-badge new"><AppIcon name="spark" /> NEW!</span>
@@ -884,18 +886,18 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
 
       <section className="home-section-head">
         <div><span><AppIcon name="gift" /></span><strong>Daily Rewards</strong></div>
-        <button onClick={onGoCases}>Hammasi</button>
+        <button onClick={onGoCases}>Games</button>
       </section>
 
       <section className="case-grid-market home-market-grid">
-        {featuredCases.length === 0 ? <Empty text="Hali case qo‘shilmagan." /> : null}
+        {featuredCases.length === 0 ? <Empty text="Hali game qo‘shilmagan." /> : null}
         {featuredCases.map((caseItem) => (
           <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onGoCases} />
         ))}
       </section>
 
       <section className="quick-stats-row">
-        <MetricCard label="Aktiv case" value={cases.length} icon="cases" tone="cyan" />
+        <MetricCard label="Aktiv game" value={cases.length} icon="cases" tone="cyan" />
         <MetricCard label="Yutuqlar" value={history.length} icon="spark" tone="purple" />
         <MetricCard label="Yechishlar" value={withdrawals.length} icon="withdraw" tone="green" />
       </section>
@@ -905,16 +907,16 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
 
 function CasesView({ cases, giftsByCase, busy, onOpenCase, onSelectCase }) {
   return (
-    <div className="screen-stack case-market-screen">
-      <section className="market-header">
+    <div className="screen-stack case-market-screen games-market-screen">
+      <section className="market-header games-header">
         <div>
-          <div className="eyebrow">Cases</div>
-          <h1>Case Market</h1>
-          <p>Premium giftlar, NFT-style sovg‘alar va real chance bilan case tanlang.</p>
+          <div className="eyebrow">Games</div>
+          <h1>Games Arena</h1>
+          <p>Box, daily reward va premium gift o‘yinlarini tanlang. Har bir game ichida real chance va stock nazorati ishlaydi.</p>
         </div>
       </section>
 
-      {cases.length === 0 ? <Empty text="Hali aktiv case yo‘q." /> : null}
+      {cases.length === 0 ? <Empty text="Hali aktiv game yo‘q." /> : null}
       <section className="case-grid-market">
         {cases.map((caseItem) => (
           <CaseCard key={caseItem.id} caseItem={caseItem} gifts={giftsByCase[caseItem.id] || []} busy={busy} onOpen={onOpenCase} onDetails={onSelectCase} />
@@ -1088,7 +1090,7 @@ function ProfileView({ telegramUser, profile, totalOpenings, cases, history, gif
         <div className="metrics-grid nested">
           <MetricCard label="Total opens" value={totalOpenings} icon="spark" tone="purple" />
           <MetricCard label="Wins" value={history.length} icon="spark" tone="gold" />
-          <MetricCard label="Cases" value={cases.length} icon="cases" tone="cyan" />
+          <MetricCard label="Games" value={cases.length} icon="games" tone="cyan" />
           <MetricCard label="Pending" value={pendingWithdrawals} icon="⏳" tone="green" />
         </div>
       </section>
@@ -1372,10 +1374,10 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
           <div className="case-preview-pointer" />
           {(livePreview.length ? livePreview : gifts).map((gift, index) => (
             <div className={`preview-reel-item ${giftRarity(gift)}`} key={`${gift.id}-${index}`} style={{ background: gift.background_value || undefined }}>
-              <GiftMedia gift={gift} />
+              <GiftMedia gift={gift} preferStatic />
             </div>
           ))}
-          {gifts.length === 0 ? <Empty text="Bu casega hali sovg‘a qo‘shilmagan." /> : null}
+          {gifts.length === 0 ? <Empty text="Bu gamega hali sovg‘a qo‘shilmagan." /> : null}
         </div>
 
         <button className="open-big-btn" disabled={busy || gifts.length === 0} onClick={onOpen}><AppIcon name="gift" /> Open {caseItem.title}</button>
@@ -1383,7 +1385,7 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
         <div className="case-prize-grid">
           {gifts.map((gift) => (
             <div className={`prize-card ${giftRarity(gift)}`} key={gift.id} style={{ background: gift.background_value || undefined }}>
-              <GiftMedia gift={gift} />
+              <GiftMedia gift={gift} preferStatic />
               <strong>{gift.title}</strong>
               <small>{gift.chance}% · Stock: {gift.stock}</small>
             </div>
@@ -1418,10 +1420,8 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
                 style={{ '--reel-distance': `${reelDistance}px` }}
               >
                 {activeReel.map((item, index) => (
-                  <div className={`pro-reel-item ${giftRarity(item)}`} key={`${item?.id || 'gift'}-${index}`} style={{ background: item?.background_value || undefined }}>
+                  <div className={`pro-reel-item media-only ${giftRarity(item)}`} key={`${item?.id || 'gift'}-${index}`} style={{ background: item?.background_value || undefined }}>
                     <GiftMedia gift={item} preferStatic />
-                    <strong>{item?.title || 'Sovg‘a'}</strong>
-                    <small>{Number(item?.chance || 0)}%</small>
                   </div>
                 ))}
               </div>
