@@ -46,6 +46,10 @@ function publicGift(gift) {
     chance: gift.chance,
     stock: gift.stock,
     is_active: gift.is_active,
+    image_url: gift.image_url || null,
+    animation_url: gift.animation_url || null,
+    background_value: gift.background_value || null,
+    rarity: gift.rarity || null,
     created_at: gift.created_at,
   };
 }
