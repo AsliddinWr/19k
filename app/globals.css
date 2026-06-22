@@ -4522,7 +4522,7 @@ span.gift-media {
   }
 
   .promo-image-banner.rocket .promo-banner-side {
-    width: 54%;
+    width: 57%;
   }
 
   .promo-image-banner.pvp .promo-banner-side {
@@ -4543,10 +4543,10 @@ span.gift-media {
   }
 
   .promo-image-banner.rocket .promo-banner-webp {
-  object-position: right center;
+  object-position: center center;
   object-fit: contain;
-  transform: scale(0.88);
-  transform-origin: right center;
+  transform: translateX(-28px) scale(0.9);
+  transform-origin: center center;
 }
 
   .promo-image-banner.pvp .promo-banner-webp {
