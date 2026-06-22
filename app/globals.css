@@ -4223,3 +4223,108 @@ span.gift-media {
     font-size: 12px;
   }
 }
+
+/* === Rocket/PVP WEBP card design === */
+.promo-banners-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.promo-image-banner {
+  grid-column: 1 / -1;
+  min-height: 138px;
+  height: 138px;
+  padding: 0 !important;
+  border-radius: 22px;
+  overflow: hidden;
+  background: transparent !important;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, .24);
+}
+
+.promo-image-banner::before,
+.promo-image-banner::after {
+  display: none !important;
+}
+
+.promo-banner-webp {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.promo-image-banner.image-failed {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 16px 14px !important;
+}
+
+.promo-image-banner.image-failed::before {
+  display: block !important;
+}
+
+.promo-image-banner.image-failed.rocket {
+  background: linear-gradient(135deg, #4da6ff, #82bfff) !important;
+}
+
+.promo-image-banner.image-failed.pvp {
+  background: linear-gradient(135deg, #ffb000, #ffcf4b) !important;
+}
+
+.promo-image-banner.image-failed .promo-banner-fallback {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 92px;
+  height: 92px;
+  z-index: 1;
+  opacity: .95;
+}
+
+.promo-image-banner.image-failed .promo-banner-fallback .app-icon {
+  width: 76px;
+  height: 76px;
+  color: rgba(255,255,255,.92);
+}
+
+.promo-image-banner.image-failed .promo-banner-text {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  max-width: 70%;
+  margin-top: auto;
+}
+
+.promo-image-banner.image-failed .promo-banner-text strong {
+  position: static;
+  display: block;
+  font-size: 28px;
+  line-height: .95;
+  letter-spacing: -0.05em;
+  text-shadow: 0 4px 0 rgba(0,0,0,.10), 0 12px 20px rgba(0,0,0,.14);
+}
+
+.promo-image-banner.image-failed .promo-banner-text small {
+  position: static;
+  display: block;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: rgba(255,255,255,.92);
+}
+
+@media (max-width: 430px) {
+  .promo-image-banner {
+    min-height: 124px;
+    height: 124px;
+    border-radius: 20px;
+  }
+}
