@@ -3515,3 +3515,100 @@ span.gift-media {
     height: 56px;
   }
 }
+
+
+/* === Games tab + gift media polish update === */
+.games-market-screen .market-header,
+.games-header {
+  background:
+    radial-gradient(circle at 88% 16%, rgba(255, 199, 0, .25), transparent 27%),
+    radial-gradient(circle at 18% 10%, rgba(31, 214, 255, .22), transparent 25%),
+    linear-gradient(135deg, rgba(124, 92, 255, .22), rgba(255, 255, 255, .04));
+}
+
+.games-market-screen .market-header h1 {
+  letter-spacing: -0.06em;
+}
+
+.mobile-nav-btn.center-home {
+  grid-column: auto;
+}
+
+/* Keep bottom menu perfectly balanced: Games · Inventory · Home · History · Profile */
+.mobile-nav {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.pro-reel-shell {
+  min-height: 142px;
+}
+
+.pro-reel-item.media-only {
+  width: 92px;
+  height: 92px;
+  min-width: 92px;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+}
+
+.pro-reel-item.media-only .gift-media {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: contain;
+  border-radius: 14px;
+  filter: drop-shadow(0 12px 16px rgba(0,0,0,.35));
+}
+
+.pro-reel-item.media-only span.gift-media {
+  display: grid;
+  place-items: center;
+}
+
+.pro-reel-item.media-only .gift-media .app-icon,
+.pro-reel-item.media-only span.gift-media .app-icon {
+  width: 62%;
+  height: 62%;
+}
+
+.pro-reel-item.media-only strong,
+.pro-reel-item.media-only small {
+  display: none !important;
+}
+
+.preview-reel-item .gift-media,
+.prize-card .gift-media {
+  object-fit: contain;
+  filter: drop-shadow(0 12px 14px rgba(0,0,0,.32));
+}
+
+.win-gift-media video.gift-media,
+.win-gift-media img.gift-media {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.win-gift-media video.gift-media {
+  background: transparent;
+}
+
+.inventory-prize-art video.gift-media,
+.inventory-prize-art img.gift-media {
+  object-fit: contain;
+}
+
+@media (max-width: 560px) {
+  .pro-reel-item.media-only {
+    width: 78px;
+    height: 78px;
+    min-width: 78px;
+    border-radius: 16px;
+  }
+
+  .pro-reel-track {
+    gap: 10px;
+  }
+}
