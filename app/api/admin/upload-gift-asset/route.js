@@ -6,18 +6,13 @@ import { verifyTelegramInitData } from '@/lib/verifyTelegram';
 export const runtime = 'nodejs';
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
-const ALLOWED_TYPES = [
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-  'video/webm',
-  'video/mp4',
-];
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const VIDEO_TYPES = ['video/webm', 'video/mp4'];
+const ALLOWED_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES];
 
 function extensionFromFile(file) {
   const fromName = String(file.name || '').split('.').pop()?.toLowerCase();
-  const allowed = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'webm', 'mp4'];
+  const allowed = ['png', 'jpg', 'jpeg', 'webp', 'webm', 'mp4'];
 
   if (fromName && allowed.includes(fromName)) {
     return fromName === 'jpeg' ? 'jpg' : fromName;
@@ -26,11 +21,10 @@ function extensionFromFile(file) {
   if (file.type === 'image/png') return 'png';
   if (file.type === 'image/jpeg') return 'jpg';
   if (file.type === 'image/webp') return 'webp';
-  if (file.type === 'image/gif') return 'gif';
   if (file.type === 'video/webm') return 'webm';
   if (file.type === 'video/mp4') return 'mp4';
 
-  return 'webp';
+  return 'bin';
 }
 
 export async function POST(request) {
@@ -60,7 +54,15 @@ export async function POST(request) {
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return jsonError('Faqat PNG, JPG, WEBP, GIF, WEBM yoki MP4 yuklash mumkin', 400);
+      return jsonError('Sovg‘a rasmi uchun PNG/JPG/WEBP, animatsiya uchun WEBM/MP4 yuklang', 400);
+    }
+
+    if (kind === 'image' && !IMAGE_TYPES.includes(file.type)) {
+      return jsonError('Rasm inputiga faqat PNG, JPG yoki WEBP yuklang', 400);
+    }
+
+    if (kind === 'animation' && !VIDEO_TYPES.includes(file.type)) {
+      return jsonError('Animatsiya inputiga faqat WEBM yoki MP4 yuklang', 400);
     }
 
     if (file.size > MAX_FILE_SIZE) {
@@ -90,6 +92,7 @@ export async function POST(request) {
 
     return Response.json({
       ok: true,
+      kind,
       path: filePath,
       publicUrl: data.publicUrl,
     });
