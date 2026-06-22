@@ -4328,3 +4328,321 @@ span.gift-media {
     border-radius: 20px;
   }
 }
+
+/* === Final mobile home polish: compact live row + side WEBP promo cards === */
+@media (max-width: 860px) {
+  .app-main > .mobile-top:first-child {
+    margin-bottom: 12px;
+  }
+
+  .mobile-casino-home {
+    gap: 14px;
+  }
+
+  .casino-home-top {
+    padding: 2px 0 0;
+  }
+
+  .live-strip-card {
+    grid-template-columns: 24px minmax(0, 1fr);
+    min-height: 50px;
+    gap: 6px;
+  }
+
+  .live-title {
+    height: 50px;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .live-title .app-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .live-title span {
+    width: 9px;
+    height: 9px;
+    margin-bottom: 4px;
+  }
+
+  .live-strip-track {
+    gap: 6px;
+    padding: 4px 0;
+  }
+
+  .live-drop-item {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+  }
+
+  .live-drop-item .gift-media,
+  .gift-media.compact {
+    width: 38px;
+    height: 38px;
+    font-size: 24px;
+  }
+
+  .live-drop-item .gift-media img,
+  .live-drop-item .gift-media video {
+    max-width: 38px;
+    max-height: 38px;
+    object-fit: contain;
+  }
+
+  .promo-banners-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .promo-image-banner {
+    grid-column: 1 / -1;
+    height: 118px;
+    min-height: 118px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    padding: 15px 16px !important;
+    border-radius: 22px;
+    overflow: hidden;
+    isolation: isolate;
+    background: transparent !important;
+  }
+
+  .promo-image-banner.rocket {
+    background:
+      radial-gradient(circle at 78% 20%, rgba(255,255,255,.35), transparent 22%),
+      linear-gradient(135deg, #64b4ff 0%, #6caeff 45%, #78c1ff 100%) !important;
+  }
+
+  .promo-image-banner.pvp {
+    background:
+      radial-gradient(circle at 85% 18%, rgba(255,255,255,.34), transparent 22%),
+      linear-gradient(135deg, #ffac08 0%, #ffc228 52%, #ffd85f 100%) !important;
+  }
+
+  .promo-image-banner::before {
+    display: block !important;
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.10), transparent 46%),
+      linear-gradient(90deg, rgba(0,0,0,.06), transparent 54%);
+    pointer-events: none;
+  }
+
+  .promo-image-banner::after {
+    display: block !important;
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(90deg, rgba(0,0,0,.04) 0%, rgba(0,0,0,.01) 52%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .promo-banner-copy {
+    position: relative;
+    z-index: 4;
+    width: 46%;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .promo-image-banner .promo-badge {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 8px 11px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 950;
+    color: #3d83ff;
+    background: rgba(255,255,255,.96);
+    box-shadow: 0 8px 18px rgba(0,0,0,.08);
+  }
+
+  .promo-image-banner.pvp .promo-badge {
+    color: #ff9f1c;
+  }
+
+  .promo-image-banner .promo-badge .app-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .promo-image-banner .promo-banner-text {
+    position: static;
+    display: grid;
+    gap: 3px;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .promo-image-banner .promo-banner-text strong,
+  .promo-image-banner strong {
+    position: static;
+    display: block;
+    font-size: 28px;
+    line-height: .92;
+    letter-spacing: -0.055em;
+    color: #fff;
+    text-shadow: 0 4px 0 rgba(0,0,0,.09), 0 10px 22px rgba(0,0,0,.16);
+    white-space: nowrap;
+  }
+
+  .promo-image-banner .promo-banner-text small,
+  .promo-image-banner small {
+    position: static;
+    display: block;
+    color: rgba(255,255,255,.94);
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1.08;
+    max-width: 165px;
+  }
+
+  .promo-banner-side {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 66%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .promo-image-banner.rocket .promo-banner-side {
+    width: 63%;
+  }
+
+  .promo-image-banner.pvp .promo-banner-side {
+    width: 70%;
+  }
+
+  .promo-banner-webp {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    transform: none;
+  }
+
+  .promo-image-banner.rocket .promo-banner-webp {
+    object-position: right center;
+  }
+
+  .promo-image-banner.pvp .promo-banner-webp {
+    object-position: right center;
+  }
+
+  .promo-image-banner .promo-banner-fallback {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 78px;
+    height: 78px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    color: rgba(255,255,255,.92);
+    filter: drop-shadow(0 12px 20px rgba(0,0,0,.15));
+  }
+
+  .promo-image-banner .promo-banner-fallback .app-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .mini-feature {
+    min-height: 82px;
+    border-radius: 18px;
+    padding: 16px 13px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+  }
+
+  .home-profile-balance span {
+    font-size: 13px;
+    margin-bottom: 3px;
+  }
+
+  .home-profile-balance strong {
+    font-size: 22px;
+  }
+
+  .deposit-btn {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 15px;
+    font-size: 15px;
+  }
+
+  .live-drop-item {
+    width: 44px;
+    height: 44px;
+  }
+
+  .live-drop-item .gift-media,
+  .gift-media.compact {
+    width: 36px;
+    height: 36px;
+  }
+
+  .promo-image-banner {
+    height: 112px;
+    min-height: 112px;
+    padding: 14px 14px !important;
+    border-radius: 21px;
+  }
+
+  .promo-banner-copy {
+    width: 48%;
+    min-width: 138px;
+  }
+
+  .promo-image-banner .promo-badge {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .promo-image-banner .promo-banner-text strong,
+  .promo-image-banner strong {
+    font-size: 25px;
+  }
+
+  .promo-image-banner .promo-banner-text small,
+  .promo-image-banner small {
+    font-size: 12px;
+    max-width: 140px;
+  }
+
+  .promo-image-banner.rocket .promo-banner-side {
+    width: 64%;
+  }
+
+  .promo-image-banner.pvp .promo-banner-side {
+    width: 72%;
+  }
+}
