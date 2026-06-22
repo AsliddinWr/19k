@@ -43,8 +43,8 @@ function publicGift(gift) {
     title: gift.title,
     type: gift.type,
     value: gift.value,
-    chance: gift.chance,
-    stock: gift.stock,
+    chance: toNumber(gift.chance),
+    stock: toNumber(gift.stock),
     is_active: gift.is_active,
     image_url: gift.image_url || null,
     animation_url: gift.animation_url || null,
@@ -120,7 +120,9 @@ export async function POST(request) {
 
     const gifts = (giftRows || []).map(normalizeGift);
     if (gifts.length === 0) {
-      return jsonError('Bu case ichida aktiv va stock bor sovg‘a yo‘q');
+      return jsonError('Bu case ichida ochiladigan sovg‘a yo‘q. Admin panelda sovg‘a active=true, chance > 0 va stock > 0 ekanini tekshiring.', 400, {
+        reason: 'NO_READY_GIFTS',
+      });
     }
 
     const totalChance = gifts.reduce((sum, gift) => sum + gift.chance, 0);
@@ -141,7 +143,7 @@ export async function POST(request) {
     }
 
     if (!updatedGift) {
-      return jsonError('Sovg‘a stocki tugagan. Qayta urinib ko‘ring.', 409);
+      return jsonError('Sovg‘a stocki boshqa ochishda tugab qoldi. Stockni ko‘paytiring yoki qayta urinib ko‘ring.', 409, { reason: 'STOCK_CHANGED' });
     }
 
     const newBalance = userBalance - casePrice;
