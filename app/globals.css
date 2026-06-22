@@ -1,4 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
+
 :root {
+  --font-ui: "Manrope", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Plus Jakarta Sans", "Manrope", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bg-0: #050713;
   --bg-1: #080b1d;
   --bg-2: #10172f;
@@ -38,7 +42,7 @@ body {
   min-height: 100vh;
   color: var(--text);
   background: var(--bg-0);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   overflow-x: hidden;
 }
 
@@ -65,7 +69,7 @@ body::after {
     linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
   background-size: 52px 52px;
-  mask-image: radial-gradient(circle at , black, transparent 72%);
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
 }
 
 button,
@@ -105,26 +109,32 @@ p {
 }
 
 h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(34px, 6vw, 72px);
   line-height: 0.94;
   letter-spacing: -0.075em;
 }
 
 h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(22px, 3vw, 34px);
   line-height: 1.05;
   letter-spacing: -0.04em;
 }
 
 h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 19px;
   letter-spacing: -0.025em;
 }
 
-.-screen {
+.center-screen {
   min-height: 100vh;
   display: grid;
-  place-items: ;
+  place-items: center;
   padding: 18px;
 }
 
@@ -162,7 +172,7 @@ h3 {
   width: min(92vw, 440px);
   padding: 34px;
   border-radius: var(--radius-xl);
-  text-align: ;
+  text-align: center;
 }
 
 .loader-card h2 {
@@ -203,7 +213,7 @@ h3 {
   width: min(92vw, 480px);
   min-height: 430px;
   display: grid;
-  place-items: ;
+  place-items: center;
   gap: 22px;
   overflow: hidden;
   isolation: isolate;
@@ -226,12 +236,12 @@ h3 {
   z-index: 2;
   display: grid;
   gap: 8px;
-  justify-items: ;
+  justify-items: center;
 }
 
 .loader-copy .eyebrow {
   display: inline-flex;
-  align-items: ;
+  align-items: center;
   gap: 8px;
   padding: 8px 12px;
   border-radius: 999px;
@@ -250,7 +260,7 @@ h3 {
   height: 230px;
   margin: 14px auto 20px;
   display: grid;
-  place-items: ;
+  place-items: center;
   filter: drop-shadow(0 0 24px rgba(255, 140, 0, 0.45));
   transform: scale(0.78);
   z-index: 3;
@@ -262,7 +272,7 @@ h3 {
   min-width: 54px;
   margin: 0;
   transform: scale(0.24);
-  transform-origin: ;
+  transform-origin: center;
   filter: drop-shadow(0 0 15px rgba(255, 140, 0, 0.62));
 }
 
@@ -332,7 +342,7 @@ h3 {
   transform: rotate(-60deg);
 }
 
-.casino-hex-cell {
+.casino-hex-cell.center {
   z-index: 4;
 }
 
@@ -354,7 +364,7 @@ h3 {
   right: 18px;
   top: 18px;
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 10px;
   padding: 9px 13px 9px 9px;
   border-radius: 999px;
@@ -504,7 +514,7 @@ h3 {
 
 .brand {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 12px;
   position: relative;
   z-index: 1;
@@ -518,7 +528,7 @@ h3 {
   width: 48px;
   height: 48px;
   display: grid;
-  place-items: ;
+  place-items: center;
   border-radius: 18px;
   color: #111827;
   background: linear-gradient(135deg, var(--gold), var(--gold-2));
@@ -547,7 +557,7 @@ h3 {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 12px;
   padding: 13px;
   border: 1px solid var(--border);
@@ -562,7 +572,7 @@ h3 {
 .gift-symbol,
 .inventory-icon {
   display: grid;
-  place-items: ;
+  place-items: center;
   flex: 0 0 auto;
   background: linear-gradient(135deg, rgba(33, 212, 253, 0.20), rgba(159, 98, 255, 0.20));
   border: 1px solid rgba(255,255,255,.14);
@@ -609,7 +619,7 @@ h3 {
 
 .rail-nav-btn {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 12px;
   min-height: 50px;
   padding: 12px 13px;
@@ -619,7 +629,7 @@ h3 {
 
 .rail-nav-btn span {
   display: grid;
-  place-items: ;
+  place-items: center;
   width: 28px;
   height: 28px;
 }
@@ -677,7 +687,7 @@ h3 {
 }
 
 .mobile-top {
-  align-items: ;
+  align-items: center;
   justify-content: space-between;
   padding: 12px;
   border-radius: 24px;
@@ -713,7 +723,7 @@ h3 {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 18px;
-  align-items: ;
+  align-items: center;
   padding: clamp(20px, 4vw, 44px);
   border-radius: 38px;
   overflow: hidden;
@@ -786,8 +796,8 @@ h3 {
 .close-btn {
   position: relative;
   display: inline-flex;
-  align-items: ;
-  justify-content: ;
+  align-items: center;
+  justify-content: center;
   min-height: 46px;
   border: 0;
   border-radius: 16px;
@@ -849,14 +859,14 @@ h3 {
 .hero-visual {
   min-height: 340px;
   display: grid;
-  place-items: ;
+  place-items: center;
 }
 
 .case-cube {
   width: min(72vw, 270px);
   height: min(72vw, 270px);
   display: grid;
-  place-items: ;
+  place-items: center;
   border-radius: 46px;
   background:
     radial-gradient(circle at 35% 25%, rgba(255,255,255,.20), transparent 26%),
@@ -879,7 +889,7 @@ h3 {
 .floating-chip {
   position: absolute;
   display: grid;
-  place-items: ;
+  place-items: center;
   width: 58px;
   height: 58px;
   border-radius: 20px;
@@ -946,7 +956,7 @@ h3 {
 
 .metric-card {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 14px;
   min-height: 112px;
   padding: 18px;
@@ -956,7 +966,7 @@ h3 {
 
 .metric-card > span {
   display: grid;
-  place-items: ;
+  place-items: center;
   width: 52px;
   height: 52px;
   flex: 0 0 auto;
@@ -1033,7 +1043,7 @@ h3 {
 .admin-item,
 .toolbar {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 12px;
 }
 
@@ -1057,7 +1067,7 @@ h3 {
 
 .mini-case-img {
   display: grid;
-  place-items: ;
+  place-items: center;
   flex: 0 0 auto;
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.10);
@@ -1128,7 +1138,7 @@ h3 {
   position: relative;
   height: 230px;
   display: grid;
-  place-items: ;
+  place-items: center;
   background:
     radial-gradient(circle at 50% 30%, rgba(248, 199, 90, 0.19), transparent 28%),
     linear-gradient(135deg, rgba(33,212,253,.09), rgba(159,98,255,.13));
@@ -1196,8 +1206,8 @@ h3 {
 .rarity-badge,
 .status-badge {
   display: inline-flex;
-  align-items: ;
-  justify-content: ;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
   min-height: 28px;
   padding: 6px 9px;
@@ -1265,7 +1275,7 @@ h3 {
 
 .inventory-actions {
   display: flex;
-  align-items: ;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
@@ -1279,7 +1289,7 @@ h3 {
 
 .profile-hero {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 18px;
   padding: 22px;
   border-radius: var(--radius-xl);
@@ -1343,7 +1353,7 @@ h3 {
   width: 64px;
   height: 64px;
   display: grid;
-  place-items: ;
+  place-items: center;
   border-radius: 20px;
   flex: 0 0 auto;
   overflow: hidden;
@@ -1414,7 +1424,7 @@ h3 {
 .upload-box {
   min-height: 160px;
   display: grid;
-  place-items: ;
+  place-items: center;
   gap: 8px;
   padding: 13px;
   border-radius: 20px;
@@ -1433,7 +1443,7 @@ h3 {
 
 .upload-box small {
   font-size: 12px;
-  text-align: ;
+  text-align: center;
 }
 
 .upload-box img {
@@ -1457,7 +1467,7 @@ h3 {
   inset: 0;
   z-index: 80;
   display: grid;
-  place-items: ;
+  place-items: center;
   padding: 18px;
   background: rgba(2, 4, 14, .72);
   backdrop-filter: blur(18px);
@@ -1495,7 +1505,7 @@ h3 {
 .modal-case-hero {
   min-height: 420px;
   display: grid;
-  place-items: ;
+  place-items: center;
   background: linear-gradient(135deg, rgba(248,199,90,.14), rgba(159,98,255,.18));
   overflow: hidden;
 }
@@ -1552,7 +1562,7 @@ h3 {
 
 .opening-modal {
   padding: 28px;
-  text-align: ;
+  text-align: center;
 }
 
 .opening-modal h2 {
@@ -1593,7 +1603,7 @@ h3 {
 
 .reel-track {
   display: flex;
-  align-items: ;
+  align-items: center;
   gap: 10px;
   height: 100%;
   padding: 14px;
@@ -1609,7 +1619,7 @@ h3 {
   width: 92px;
   height: 92px;
   display: grid;
-  place-items: ;
+  place-items: center;
   flex: 0 0 auto;
   border-radius: 24px;
   font-size: 42px;
@@ -1637,7 +1647,7 @@ h3 {
 .win-result {
   position: relative;
   display: grid;
-  place-items: ;
+  place-items: center;
   gap: 12px;
   padding: 28px 10px;
 }
@@ -4522,11 +4532,11 @@ span.gift-media {
   }
 
   .promo-image-banner.rocket .promo-banner-side {
-    width: 60%;
+    width: 63%;
   }
 
   .promo-image-banner.pvp .promo-banner-side {
-    width: 60%;
+    width: 70%;
   }
 
   .promo-banner-webp {
@@ -4543,17 +4553,11 @@ span.gift-media {
   }
 
   .promo-image-banner.rocket .promo-banner-webp {
-  object-position: center center;
-  object-fit: contain;
-  transform: translateX(-22px) scale(1.01);
-  transform-origin: center center;
-}
+    object-position: right center;
+  }
 
   .promo-image-banner.pvp .promo-banner-webp {
-    object-position: center center;
-    object-fit: contain;
-    transform: translateX(-22px) scale(1.01);
-     transform-origin: center center;
+    object-position: right center;
   }
 
   .promo-image-banner .promo-banner-fallback {
@@ -4650,5 +4654,175 @@ span.gift-media {
 
   .promo-image-banner.pvp .promo-banner-side {
     width: 72%;
+  }
+}
+
+
+/* === Typography premium polish ===
+   Only font/weight/spacing is changed here. Layout and logic untouched. */
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+p,
+span,
+small,
+label,
+.field input,
+.field select,
+.field textarea {
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+.brand strong,
+.user-mini strong,
+.hero-copy h1,
+.page-header h1,
+.page-header h2,
+.section-title h2,
+.case-content-pro h2,
+.inventory-card h3,
+.metric-card strong,
+.jackpot-card strong,
+.promo-banner strong,
+.promo-image-banner strong,
+.promo-image-banner .promo-banner-text strong,
+.mini-feature strong,
+.balance-pill strong,
+.primary-btn,
+.ghost-btn,
+.danger-btn,
+.mini-open,
+.admin-tabs button,
+.mobile-nav-btn strong,
+.rail-nav-btn strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow,
+.rarity-badge,
+.status-badge,
+.gift-chip,
+.case-price-badge,
+.promo-image-banner .promo-badge,
+.promo-banner .promo-badge,
+.live-title span,
+.field > span,
+.upload-field > span {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+
+.brand strong {
+  font-size: 21px;
+}
+
+.brand span,
+.user-mini span,
+.user-mini small,
+.rail-footer span,
+.rail-footer strong,
+.balance-pill span {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rail-nav-btn strong,
+.mobile-nav-btn strong {
+  font-size: 13px;
+  letter-spacing: -0.015em;
+}
+
+.case-content-pro h2,
+.inventory-card h3,
+.compact-case-row strong,
+.activity-row strong,
+.admin-item-main strong,
+.toolbar strong {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.case-content-pro p,
+.inventory-card p,
+.compact-case-row span,
+.activity-row span,
+.admin-item-main span,
+.toolbar span {
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+.promo-image-banner .promo-banner-text strong,
+.promo-image-banner strong {
+  font-size: 23px;
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.18);
+}
+
+.promo-image-banner .promo-banner-text small,
+.promo-image-banner small {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.012em;
+}
+
+.promo-image-banner .promo-badge {
+  font-size: 10px;
+  letter-spacing: 0.055em;
+}
+
+.live-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.live-drop-item strong,
+.live-drop-item span {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.primary-btn,
+.ghost-btn,
+.danger-btn,
+.mini-open,
+.close-btn {
+  font-weight: 800;
+  letter-spacing: -0.018em;
+}
+
+.field input,
+.field select,
+.field textarea {
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+@media (max-width: 720px) {
+  h1 {
+    letter-spacing: -0.055em;
+  }
+
+  .promo-image-banner .promo-banner-text strong,
+  .promo-image-banner strong {
+    font-size: 21px;
   }
 }
