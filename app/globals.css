@@ -5611,14 +5611,14 @@ h3,
   .promo-image-banner.rocket .promo-banner-webp {
     object-fit: contain !important;
     object-position: right center !important;
-    transform: translateX(-25px) scale(1.2) !important;
+    transform: translateX(-12px) scale(1.03) !important;
     transform-origin: right center !important;
   }
 
   .promo-image-banner.pvp .promo-banner-webp {
     object-fit: contain !important;
     object-position: right center !important;
-    transform: translateX(-4px) scale(1.2) !important;
+    transform: translateX(-4px) scale(1.04) !important;
     transform-origin: right center !important;
   }
 }
@@ -5630,10 +5630,137 @@ h3,
   }
 
   .promo-image-banner.rocket .promo-banner-webp {
-    transform: translateX(-8px) scale(1.3) !important;
+    transform: translateX(-8px) scale(1.02) !important;
   }
 
   .promo-image-banner.pvp .promo-banner-webp {
-    transform: translateX(-2px) scale(1.3) !important;
+    transform: translateX(-2px) scale(1.03) !important;
+  }
+}
+
+/* =========================
+   MINIMAL PREMIUM LOADING SCREEN
+   Only loader remains: no card, no title, no text.
+   ========================= */
+.minimal-loader-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(33, 212, 253, 0.16), transparent 30%),
+    radial-gradient(circle at 30% 84%, rgba(159, 98, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(248, 199, 90, 0.07), transparent 32%),
+    linear-gradient(145deg, #09071d 0%, #0b1027 46%, #061a26 100%);
+}
+
+.minimal-loader-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(255, 184, 45, 0.08), transparent 26%);
+  background-size: 36px 36px, 36px 36px, 100% 100%;
+  mask-image: radial-gradient(circle at center, #000 0%, rgba(0, 0, 0, 0.9) 36%, transparent 84%);
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, rgba(0, 0, 0, 0.9) 36%, transparent 84%);
+}
+
+.minimal-loader-screen::before,
+.minimal-loader-screen::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  filter: blur(34px);
+  pointer-events: none;
+}
+
+.minimal-loader-screen::before {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 168, 30, 0.22), transparent 68%);
+  animation: minimalLoaderGlow 2.4s ease-in-out infinite;
+}
+
+.minimal-loader-screen::after {
+  right: -90px;
+  bottom: -100px;
+  background: radial-gradient(circle, rgba(33, 212, 253, 0.16), transparent 70%);
+}
+
+.minimal-loader-shell {
+  position: relative;
+  z-index: 2;
+  width: 240px;
+  height: 240px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.minimal-loader-shell::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(255, 183, 43, 0.12), transparent 64%),
+    conic-gradient(from 140deg, transparent, rgba(248, 199, 90, 0.18), transparent, rgba(33, 212, 253, 0.10), transparent);
+  filter: blur(7px);
+  animation: minimalLoaderRotate 5s linear infinite;
+}
+
+.minimal-loader-shell .casino-hex-loader {
+  margin: 0;
+  transform: scale(0.78);
+  filter:
+    drop-shadow(0 0 18px rgba(255, 167, 25, 0.72))
+    drop-shadow(0 0 34px rgba(255, 116, 0, 0.28));
+}
+
+.minimal-loader-shell .casino-hex-loader::before {
+  inset: 30px;
+  background:
+    radial-gradient(circle, rgba(255, 190, 74, 0.32), transparent 60%),
+    radial-gradient(circle, rgba(255, 94, 14, 0.2), transparent 72%);
+}
+
+.minimal-loader-shell .casino-hex-loader::after {
+  opacity: 0.85;
+}
+
+@keyframes minimalLoaderGlow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.88);
+    opacity: 0.58;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.95;
+  }
+}
+
+@keyframes minimalLoaderRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .minimal-loader-shell {
+    width: 200px;
+    height: 200px;
+  }
+
+  .minimal-loader-shell .casino-hex-loader {
+    transform: scale(0.68);
   }
 }
