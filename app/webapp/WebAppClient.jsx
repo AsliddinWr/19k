@@ -701,14 +701,10 @@ export default function WebAppClient() {
 
   if (loading) {
     return (
-      <main className="center-screen casino-bg">
-        <div className="loader-card premium-card hex-loader-card">
+      <main className="minimal-loader-screen">
+        <div className="minimal-loader-bg" aria-hidden="true" />
+        <div className="minimal-loader-shell" aria-label="Casino Arena loading">
           <HexLoader />
-          <div className="loader-copy">
-            <span className="eyebrow">Secure WebApp</span>
-            <h2>Casino Arena yuklanmoqda</h2>
-            <p>Telegram sessiya va Supabase ma’lumotlari tekshirilmoqda.</p>
-          </div>
         </div>
       </main>
     );
@@ -914,7 +910,7 @@ function NavButton({ item, active, onClick, mobile = false }) {
 }
 
 
-function PromoImageCard({ variant, image, badge, badgeIcon, title, subtitle, fallbackIcon, onClick }) {
+function PromoImageCard({ variant, image, badge, badgeIcon, title, fallbackIcon, onClick }) {
   const [failed, setFailed] = useState(false);
 
   return (
@@ -922,7 +918,7 @@ function PromoImageCard({ variant, image, badge, badgeIcon, title, subtitle, fal
       type="button"
       className={`promo-banner promo-image-banner ${variant} ${failed ? 'image-failed' : ''}`}
       onClick={onClick}
-      aria-label={`${title}. ${subtitle}`}
+      aria-label={title}
     >
       <div className="promo-banner-copy">
         <span className={`promo-badge ${variant === 'pvp' ? 'new' : ''}`}>
@@ -930,7 +926,6 @@ function PromoImageCard({ variant, image, badge, badgeIcon, title, subtitle, fal
         </span>
         <span className="promo-banner-text">
           <strong>{title}</strong>
-          <small>{subtitle}</small>
         </span>
       </div>
 
@@ -994,7 +989,6 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
           badge="HOT!"
           badgeIcon="spark"
           title="ROCKET"
-          subtitle="Premium game larni oching"
           fallbackIcon="rocket"
           onClick={onGoCases}
         />
@@ -1004,7 +998,6 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
           badge="NEW!"
           badgeIcon="spark"
           title="PVP"
-          subtitle="Omadingizni sinang"
           fallbackIcon="swords"
           onClick={onGoCases}
         />
