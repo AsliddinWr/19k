@@ -5513,3 +5513,127 @@ h3,
     font-size: 10.5px !important;
   }
 }
+
+/* ==========================================================
+   ROCKET / PVP PROMO CARDS — PATTERN + BOLD TITLE UPDATE
+   Faqat Home dagi 2 ta katta promo kartani chiroyliroq qiladi.
+   Kichik subtitle olib tashlangan, title esa qalinroq ko'rinadi.
+   ========================================================== */
+@media (max-width: 900px) {
+  .promo-image-banner {
+    position: relative !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 16px 34px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .promo-image-banner.rocket {
+    background:
+      radial-gradient(circle at 83% 28%, rgba(255, 255, 255, 0.38), transparent 20%),
+      radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.18), transparent 17%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.11) 0 2px, transparent 2px 18px),
+      linear-gradient(135deg, #55a9ff 0%, #6bb7ff 45%, #80ccff 100%) !important;
+  }
+
+  .promo-image-banner.pvp {
+    background:
+      radial-gradient(circle at 84% 24%, rgba(255, 255, 255, 0.38), transparent 20%),
+      radial-gradient(circle at 17% 80%, rgba(255, 244, 180, 0.26), transparent 22%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.13) 0 2px, transparent 2px 20px),
+      linear-gradient(135deg, #ffab08 0%, #ffc126 50%, #ffda64 100%) !important;
+  }
+
+  .promo-image-banner::before {
+    display: block !important;
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    background:
+      radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.30) 0 1px, transparent 1.8px),
+      radial-gradient(circle at 75% 72%, rgba(255, 255, 255, 0.18) 0 2px, transparent 3px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.13), transparent 34%, transparent 72%, rgba(255, 255, 255, 0.08));
+    background-size: 34px 34px, 100% 100%, 100% 100% !important;
+    opacity: 0.78 !important;
+    pointer-events: none !important;
+  }
+
+  .promo-image-banner::after {
+    display: block !important;
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 2 !important;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.025) 44%, transparent 68%),
+      linear-gradient(135deg, transparent 0 42%, rgba(255, 255, 255, 0.18) 42% 44%, transparent 44% 100%);
+    pointer-events: none !important;
+  }
+
+  .promo-banner-copy {
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  .promo-image-banner .promo-banner-text {
+    display: block !important;
+    margin-top: auto !important;
+  }
+
+  .promo-image-banner .promo-banner-text small,
+  .promo-image-banner small {
+    display: none !important;
+  }
+
+  .promo-image-banner .promo-banner-text strong,
+  .promo-image-banner strong {
+    font-size: 31px !important;
+    line-height: 0.92 !important;
+    font-weight: 1000 !important;
+    letter-spacing: -0.06em !important;
+    color: #ffffff !important;
+    text-shadow:
+      0 3px 0 rgba(0, 0, 0, 0.09),
+      0 12px 24px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  .promo-image-banner .promo-badge {
+    font-weight: 1000 !important;
+    letter-spacing: -0.02em !important;
+    box-shadow:
+      0 9px 18px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+  }
+
+  .promo-image-banner.rocket .promo-banner-webp {
+    object-fit: contain !important;
+    object-position: right center !important;
+    transform: translateX(-12px) scale(1.03) !important;
+    transform-origin: right center !important;
+  }
+
+  .promo-image-banner.pvp .promo-banner-webp {
+    object-fit: contain !important;
+    object-position: right center !important;
+    transform: translateX(-4px) scale(1.04) !important;
+    transform-origin: right center !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .promo-image-banner .promo-banner-text strong,
+  .promo-image-banner strong {
+    font-size: 29px !important;
+  }
+
+  .promo-image-banner.rocket .promo-banner-webp {
+    transform: translateX(-8px) scale(1.02) !important;
+  }
+
+  .promo-image-banner.pvp .promo-banner-webp {
+    transform: translateX(-2px) scale(1.03) !important;
+  }
+}
