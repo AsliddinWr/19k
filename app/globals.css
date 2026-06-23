@@ -5611,14 +5611,14 @@ h3,
   .promo-image-banner.rocket .promo-banner-webp {
     object-fit: contain !important;
     object-position: right center !important;
-    transform: translateX(-12px) scale(1.03) !important;
+    transform: translateX(-12px) scale(1.2) !important;
     transform-origin: right center !important;
   }
 
   .promo-image-banner.pvp .promo-banner-webp {
     object-fit: contain !important;
     object-position: right center !important;
-    transform: translateX(-4px) scale(1.04) !important;
+    transform: translateX(-4px) scale(1.2) !important;
     transform-origin: right center !important;
   }
 }
@@ -5630,10 +5630,10 @@ h3,
   }
 
   .promo-image-banner.rocket .promo-banner-webp {
-    transform: translateX(-8px) scale(1.2) !important;
+    transform: translateX(-8px) scale(1.3) !important;
   }
 
   .promo-image-banner.pvp .promo-banner-webp {
-    transform: translateX(-2px) scale(1.2) !important;
+    transform: translateX(-2px) scale(1.3) !important;
   }
 }
