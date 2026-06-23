@@ -5611,7 +5611,7 @@ h3,
   .promo-image-banner.rocket .promo-banner-webp {
     object-fit: contain !important;
     object-position: right center !important;
-    transform: translateX(-12px) scale(1.2) !important;
+    transform: translateX(-17px) scale(1.2) !important;
     transform-origin: right center !important;
   }
 
