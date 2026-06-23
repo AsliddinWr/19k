@@ -304,6 +304,7 @@ export default function WebAppClient() {
 
   const toastTimerRef = useRef(null);
   const actionLockRef = useRef(false);
+  const openingLockRef = useRef(false);
   const hasBootstrappedRef = useRef(false);
   const mountedRef = useRef(false);
 
@@ -485,12 +486,15 @@ export default function WebAppClient() {
   }
 
   async function openCase(caseItem) {
+    if (openingLockRef.current) return;
+
     const caseGifts = giftsByCase[caseItem.id] || [];
     const activeGiftPool = caseGifts.filter((gift) => gift.is_active !== false && Number(gift.stock || 0) > 0 && Number(gift.chance || 0) > 0);
 
     if (activeGiftPool.length === 0) {
       setSelectedCase(caseItem);
       setError('Bu case ochilishi uchun kamida 1 ta aktiv sovg‘a kerak: chance > 0, stock > 0 va sovg‘a rasmi kiritilgan bo‘lsin. Admin → Profile → Admin Panel → Gifts bo‘limidan tekshiring.');
+      tg?.HapticFeedback?.notificationOccurred?.('error');
       return;
     }
 
@@ -500,56 +504,74 @@ export default function WebAppClient() {
       return;
     }
 
+    openingLockRef.current = true;
+    setError('');
     setSelectedCase(null);
+
+    const previewReel = buildOpeningReel(activeGiftPool, null);
+
     setOpening({
       stage: 'preparing',
       caseItem,
       gift: null,
-      reel: buildOpeningReel(activeGiftPool, null),
+      reel: previewReel,
       spinKey: Date.now(),
     });
 
-    const result = await runAction(
-      () => apiPost('/api/open-case', { caseId: caseItem.id }),
-      ''
-    );
+    try {
+      tg?.HapticFeedback?.impactOccurred?.('light');
 
-    if (!result?.gift) {
+      const [result] = await Promise.all([
+        apiPost('/api/open-case', { caseId: caseItem.id }),
+        delay(420),
+      ]);
+
+      if (!result?.gift) {
+        throw new Error('Server natija qaytarmadi. Qayta urinib ko‘ring.');
+      }
+
+      const reel = buildOpeningReel(activeGiftPool, result.gift);
+      const spinKey = Date.now();
+
+      setOpening({
+        stage: 'rolling',
+        caseItem,
+        gift: result.gift,
+        reel,
+        opening: result.opening,
+        balanceBefore: result.balanceBefore,
+        balanceAfter: result.balanceAfter,
+        spinKey,
+      });
+
+      setProfile((current) => (current ? { ...current, balance: result.balanceAfter ?? result.balance } : current));
+      setGifts((current) => current.map((item) => (String(item.id) === String(result.gift.id) ? { ...item, ...result.gift } : item)));
+      if (result.history?.id) {
+        setHistory((current) => [result.history, ...current.filter((item) => String(item.id) !== String(result.history.id))]);
+      }
+
+      tg?.HapticFeedback?.impactOccurred?.('medium');
+      await delay(3450);
+
+      setOpening({
+        stage: 'result',
+        caseItem,
+        gift: result.gift,
+        reel,
+        opening: result.opening,
+        balanceBefore: result.balanceBefore,
+        balanceAfter: result.balanceAfter,
+        spinKey,
+      });
+
+      tg?.HapticFeedback?.notificationOccurred?.('success');
+    } catch (err) {
       setOpening(null);
-      return;
+      setError(err.message || 'Case ochishda xatolik yuz berdi');
+      tg?.HapticFeedback?.notificationOccurred?.('error');
+    } finally {
+      openingLockRef.current = false;
     }
-
-    const reel = buildOpeningReel(activeGiftPool, result.gift);
-
-    setOpening({
-      stage: 'rolling',
-      caseItem,
-      gift: result.gift,
-      reel,
-      opening: result.opening,
-      balanceBefore: result.balanceBefore,
-      balanceAfter: result.balanceAfter,
-      spinKey: Date.now(),
-    });
-
-    setProfile((current) => ({ ...current, balance: result.balanceAfter ?? result.balance }));
-    tg?.HapticFeedback?.impactOccurred?.('medium');
-
-    await delay(3600);
-
-    setOpening({
-      stage: 'result',
-      caseItem,
-      gift: result.gift,
-      reel,
-      opening: result.opening,
-      balanceBefore: result.balanceBefore,
-      balanceAfter: result.balanceAfter,
-      spinKey: Date.now(),
-    });
-
-    tg?.HapticFeedback?.notificationOccurred?.('success');
-    await loadApp({ silent: true });
   }
 
   async function createWithdraw(giftId) {
@@ -904,6 +926,7 @@ export default function WebAppClient() {
           opening={opening}
           gifts={giftsByCase[opening.caseItem.id] || []}
           onClose={() => setOpening(null)}
+          onInventory={() => { setOpening(null); setTab('inventory'); }}
           onOpenAgain={() => openCase(opening.caseItem)}
           busy={busy}
         />
@@ -1690,11 +1713,16 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
   );
 }
 
-function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
+function OpeningModal({ opening, gifts, onClose, onInventory, onOpenAgain, busy }) {
   const { stage, gift, caseItem, reel = [], spinKey, opening: openingMeta, balanceBefore, balanceAfter } = opening;
   const activeReel = reel.length ? reel : buildOpeningReel(gifts, gift);
   const isSpinning = stage === 'preparing' || stage === 'rolling';
-  const reelDistance = Math.max(0, (activeReel.length - 4) * 126);
+  const isBalance = isBalanceReward(gift);
+  const reelDistance = Math.max(0, (activeReel.length - 5) * 126);
+  const resultTitle = isBalance ? 'Balansga qo‘shildi' : 'Inventoryga qo‘shildi';
+  const resultText = isBalance
+    ? `Tabriklaymiz! +${money(rewardValue(gift))} so‘m balansingizga avtomatik qo‘shildi.`
+    : 'Tabriklaymiz! Gift inventory’ga tushdi va tarixga yozildi.';
 
   return (
     <div className="modal-backdrop opening-backdrop">
@@ -1702,12 +1730,12 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
         {isSpinning ? (
           <>
             <div className="opening-topline">
-              <span className="eyebrow">Opening {caseItem.title}</span>
-              <strong>{money(caseItem.price)} so‘m</strong>
+              <span className="eyebrow">{stage === 'preparing' ? 'Case tayyor' : 'Case ochilmoqda'}</span>
+              <strong>{caseItem.title} · {money(caseItem.price)} so‘m</strong>
             </div>
-            <h2>{stage === 'preparing' ? 'Server natijani tayyorlamoqda...' : 'Omad g‘ildiragi aylanmoqda...'}</h2>
-            <div className="pro-reel-shell">
-              <div className="reel-center-line">◆</div>
+            <h2>{stage === 'preparing' ? 'Omadli sovg‘a tanlanmoqda' : 'Reel aylanmoqda...'}</h2>
+            <div className="pro-reel-shell" aria-label="Case opening reel">
+              <div className="reel-center-line"><span>◆</span></div>
               <div
                 key={spinKey}
                 className={`pro-reel-track ${stage === 'rolling' ? 'is-rolling' : 'is-preparing'}`}
@@ -1720,25 +1748,25 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
                 ))}
               </div>
             </div>
-            <div className="opening-info-row">
-              <span><AppIcon name="spark" /> Server random</span>
-              <span><AppIcon name="box" /> Stock nazorat</span>
-              <span><AppIcon name="admin" /> Secure logic</span>
+            <div className="opening-info-row compact">
+              <span><AppIcon name="spark" /> Secure random</span>
+              <span><AppIcon name="box" /> Stock checked</span>
+              <span><AppIcon name="coin" /> Balance synced</span>
             </div>
-            <p>Natija serverda tanlanadi. Animatsiya faqat chiroyli ko‘rsatish uchun.</p>
           </>
         ) : (
           <>
             <button className="close-btn" onClick={onClose}>×</button>
-            <div className={`win-result ${giftRarity(gift)}`}>
-              <div className="win-confetti">
-                <span /><span /><span /><span /><span />
+            <div className={`win-result ${giftRarity(gift)} ${isBalance ? 'balance-win' : 'gift-win'}`}>
+              <div className="win-confetti" aria-hidden="true">
+                <span /><span /><span /><span /><span /><span /><span />
               </div>
-              <div className="win-spark"><AppIcon name="spark" /> JACKPOT HIT</div>
+              <div className="win-spark"><AppIcon name={isBalance ? 'coin' : 'spark'} /> {isBalance ? 'BALANCE WIN' : 'REWARD WIN'}</div>
               <div className="win-gift-media" style={{ background: gift?.background_value || undefined }}><GiftMedia gift={gift} /></div>
               <RarityBadge rarity={giftRarity(gift)} />
-              <h2>{gift?.title}</h2>
-              <p>{isBalanceReward(gift) ? `Tabriklaymiz! ${money(rewardValue(gift))} so‘m balansingizga avtomatik qo‘shildi.` : 'Tabriklaymiz! Gift inventory’ga tushdi va tarixga yozildi.'}</p>
+              <h2>{resultTitle}</h2>
+              <h3>{gift?.title}</h3>
+              <p>{resultText}</p>
 
               <div className="win-stats">
                 <div>
@@ -1757,7 +1785,11 @@ function OpeningModal({ opening, gifts, onClose, onOpenAgain, busy }) {
 
               <div className="win-actions">
                 <button className="primary-btn" disabled={busy} onClick={onOpenAgain}>Yana ochish</button>
-                <button className="ghost-btn" onClick={onClose}>Inventoryga o‘tish</button>
+                {isBalance ? (
+                  <button className="ghost-btn" onClick={onClose}>Yopish</button>
+                ) : (
+                  <button className="ghost-btn" onClick={onInventory}>Inventoryga o‘tish</button>
+                )}
               </div>
             </div>
           </>
