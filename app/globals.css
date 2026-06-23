@@ -5764,3 +5764,100 @@ h3,
     transform: scale(0.68);
   }
 }
+
+/* ==========================================================
+   BUGFIX / PERFORMANCE POLISH
+   - Full-screen loader only on first boot; later refresh stays smooth.
+   - Media paint flicker reduced.
+   - Heavy mobile glass/animation pressure reduced without changing design.
+   ========================================================== */
+.app-frame,
+.mobile-casino-home,
+.case-market-screen,
+.screen-stack {
+  isolation: isolate;
+}
+
+.app-frame img,
+.app-frame video,
+.promo-banner-webp,
+.gift-media,
+.market-case-art img,
+.case-detail-thumb img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.promo-banner-webp,
+.gift-media,
+.market-case-art img,
+.case-detail-thumb img {
+  will-change: transform;
+}
+
+.live-strip-track {
+  contain: layout paint;
+  overscroll-behavior-x: contain;
+  scroll-behavior: auto;
+}
+
+.live-drop-item,
+.market-case-card,
+.promo-image-banner,
+.mini-feature,
+.mobile-nav,
+.mobile-nav-btn {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.busy-indicator {
+  pointer-events: none;
+  animation: none !important;
+}
+
+.toast,
+.global-alert {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Keep repeated compact gifts static and stable on the home live row. */
+.live-drop-item .gift-media {
+  filter: drop-shadow(0 8px 11px rgba(0, 0, 0, 0.28));
+}
+
+/* Avoid expensive hover paints on touch devices. */
+@media (hover: none) and (pointer: coarse) {
+  .market-case-card:hover,
+  .promo-image-banner:hover,
+  .mini-feature:hover,
+  .mobile-nav-btn:hover {
+    transform: translateZ(0) !important;
+  }
+
+  .premium-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* Keep animations lighter for users/devices that prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .case-art-shine,
+  .win-confetti span,
+  .live-drop-item,
+  .promo-image-banner::before,
+  .promo-image-banner::after {
+    animation: none !important;
+  }
+}
