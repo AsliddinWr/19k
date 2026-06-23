@@ -5630,10 +5630,10 @@ h3,
   }
 
   .promo-image-banner.rocket .promo-banner-webp {
-    transform: translateX(-8px) scale(1.02) !important;
+    transform: translateX(-8px) scale(1.2) !important;
   }
 
   .promo-image-banner.pvp .promo-banner-webp {
-    transform: translateX(-2px) scale(1.03) !important;
+    transform: translateX(-2px) scale(1.2) !important;
   }
 }
