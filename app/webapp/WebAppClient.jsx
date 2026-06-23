@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const emptyCaseForm = {
   title: '',
@@ -302,6 +302,11 @@ export default function WebAppClient() {
   const [selectedCase, setSelectedCase] = useState(null);
   const [opening, setOpening] = useState(null);
 
+  const toastTimerRef = useRef(null);
+  const actionLockRef = useRef(false);
+  const hasBootstrappedRef = useRef(false);
+  const mountedRef = useRef(false);
+
   const [profile, setProfile] = useState(null);
   const [telegramUser, setTelegramUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -334,8 +339,15 @@ export default function WebAppClient() {
   ]), []);
 
   const showToast = useCallback((message) => {
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+
     setToast(message);
-    window.setTimeout(() => setToast(''), 2600);
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast('');
+      toastTimerRef.current = null;
+    }, 2200);
   }, []);
 
   const apiPost = useCallback(async (url, payload = {}) => {
@@ -349,10 +361,10 @@ export default function WebAppClient() {
       body: JSON.stringify({ initData, ...payload }),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => null);
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || 'Server xatosi');
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || `Server xatosi (${response.status})`);
     }
 
     return data;
@@ -370,23 +382,28 @@ export default function WebAppClient() {
       body: formData,
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => null);
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || 'Server xatosi');
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || `Server xatosi (${response.status})`);
     }
 
     return data;
   }, [initData]);
 
-  const loadApp = useCallback(async () => {
+  const loadApp = useCallback(async ({ silent = false } = {}) => {
     if (!initData) return;
 
-    setLoading(true);
+    if (!silent && !hasBootstrappedRef.current) {
+      setLoading(true);
+    }
     setError('');
 
     try {
       const data = await apiPost('/api/bootstrap');
+
+      if (!mountedRef.current) return;
+
       setProfile(data.user);
       setTelegramUser(data.telegramUser);
       setIsAdmin(Boolean(data.isAdmin));
@@ -395,23 +412,32 @@ export default function WebAppClient() {
       setHistory(data.history || []);
       setWithdrawals(data.withdrawals || []);
 
-      if (data.cases?.[0]?.id && !giftForm.case_id) {
-        setGiftForm((current) => ({ ...current, case_id: data.cases[0].id }));
+      if (data.cases?.[0]?.id) {
+        setGiftForm((current) => (current.case_id ? current : { ...current, case_id: data.cases[0].id }));
       }
+
+      hasBootstrappedRef.current = true;
     } catch (err) {
-      setError(err.message || 'Ma’lumot yuklashda xatolik');
+      if (mountedRef.current) {
+        setError(err.message || 'Ma’lumot yuklashda xatolik');
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [apiPost, giftForm.case_id, initData]);
+  }, [apiPost, initData]);
 
   useEffect(() => {
+    mountedRef.current = true;
     const app = window.Telegram?.WebApp;
 
     if (!app) {
       setLoading(false);
       setError('Bu sahifa Telegram ichida ochilmagan. Botdagi Web App tugmasidan oching.');
-      return;
+      return () => {
+        mountedRef.current = false;
+      };
     }
 
     app.ready();
@@ -422,14 +448,25 @@ export default function WebAppClient() {
     setTg(app);
     setInitData(app.initData || '');
     setTelegramUser(app.initDataUnsafe?.user || null);
+
+    return () => {
+      mountedRef.current = false;
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
     loadApp();
   }, [loadApp]);
 
-  async function runAction(callback, successText) {
-    setBusy(true);
+  async function runAction(callback, successText, { silent = false } = {}) {
+    if (actionLockRef.current) return null;
+
+    actionLockRef.current = true;
+    if (!silent) setBusy(true);
     setError('');
 
     try {
@@ -442,7 +479,8 @@ export default function WebAppClient() {
       tg?.HapticFeedback?.notificationOccurred?.('error');
       return null;
     } finally {
-      setBusy(false);
+      actionLockRef.current = false;
+      if (!silent) setBusy(false);
     }
   }
 
@@ -511,7 +549,7 @@ export default function WebAppClient() {
     });
 
     tg?.HapticFeedback?.notificationOccurred?.('success');
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function createWithdraw(giftId) {
@@ -519,7 +557,7 @@ export default function WebAppClient() {
       () => apiPost('/api/withdraw', { giftId }),
       'Yechish so‘rovi yuborildi ✅'
     );
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function uploadCaseImage() {
@@ -559,7 +597,7 @@ export default function WebAppClient() {
 
     setCaseForm(emptyCaseForm);
     setCaseImageFile(null);
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function updateCase(caseItem, updates) {
@@ -567,7 +605,7 @@ export default function WebAppClient() {
       () => apiPost('/api/admin/case', { action: 'update', caseId: caseItem.id, ...updates }),
       'Case yangilandi ✅'
     );
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function deleteCase(caseId) {
@@ -577,7 +615,7 @@ export default function WebAppClient() {
       () => apiPost('/api/admin/case', { action: 'delete', caseId }),
       'Case o‘chirildi'
     );
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function createGift(event) {
@@ -629,7 +667,7 @@ export default function WebAppClient() {
     }));
     setGiftImageFile(null);
     setGiftAnimationFile(null);
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function updateGift(gift, updates) {
@@ -637,7 +675,7 @@ export default function WebAppClient() {
       () => apiPost('/api/admin/gift', { action: 'update', giftId: gift.id, ...updates }),
       'Sovg‘a yangilandi ✅'
     );
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function deleteGift(giftId) {
@@ -647,12 +685,16 @@ export default function WebAppClient() {
       () => apiPost('/api/admin/gift', { action: 'delete', giftId }),
       'Sovg‘a o‘chirildi'
     );
-    await loadApp();
+    await loadApp({ silent: true });
   }
 
   async function loadAdminUsers() {
-    const result = await runAction(() => apiPost('/api/admin/user', { action: 'list' }));
-    if (result?.users) setAdminUsers(result.users);
+    try {
+      const result = await apiPost('/api/admin/user', { action: 'list' });
+      if (result?.users) setAdminUsers(result.users);
+    } catch (err) {
+      setError(err.message || 'Admin userlarni yuklashda xatolik');
+    }
   }
 
   async function addBalance(event) {
@@ -676,8 +718,12 @@ export default function WebAppClient() {
   }
 
   async function loadAdminWithdrawals() {
-    const result = await runAction(() => apiPost('/api/admin/withdrawals', { action: 'list' }));
-    if (result?.withdrawals) setAdminWithdrawals(result.withdrawals);
+    try {
+      const result = await apiPost('/api/admin/withdrawals', { action: 'list' });
+      if (result?.withdrawals) setAdminWithdrawals(result.withdrawals);
+    } catch (err) {
+      setError(err.message || 'Yechish so‘rovlarini yuklashda xatolik');
+    }
   }
 
   async function updateWithdrawal(requestId, status) {
@@ -975,7 +1021,7 @@ function HomeView({ telegramUser, profile, cases, giftsByCase, history, gifts, w
         <div className="live-strip-track">
           {(liveDrops.length ? liveDrops : gifts.slice(0, 8)).map((gift, index) => (
             <div className="live-drop-item" key={`${gift?.id || 'gift'}-${index}`} style={{ background: gift?.background_value || undefined }}>
-              <GiftMedia gift={gift} compact />
+              <GiftMedia gift={gift} compact preferStatic />
             </div>
           ))}
           {gifts.length === 0 && liveDrops.length === 0 ? [0,1,2,3,4,5].map((item) => <div className="live-drop-item" key={item}><AppIcon name="gem" /></div>) : null}
@@ -1053,7 +1099,7 @@ function CaseCard({ caseItem, gifts, busy, onOpen, onDetails }) {
       onClick={() => onDetails(caseItem)}
     >
       <div className="market-case-art">
-        {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <div className="case-placeholder"><AppIcon name="box" /></div>}
+        {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} loading="lazy" decoding="async" /> : <div className="case-placeholder"><AppIcon name="box" /></div>}
         {badge ? <div className="market-case-badge"><AppIcon name="spark" /> {badge}</div> : null}
         <div className="case-art-shine" />
       </div>
@@ -1090,11 +1136,11 @@ function GiftMedia({ gift, compact = false, preferStatic = false }) {
   }
 
   if (animationUrl && !preferStatic) {
-    return <video className={mediaClass} src={animationUrl} autoPlay muted loop playsInline preload="metadata" />;
+    return <video className={mediaClass} src={animationUrl} poster={imageUrl || undefined} autoPlay muted loop playsInline preload="metadata" />;
   }
 
   if (imageUrl) {
-    return <img className={mediaClass} src={imageUrl} alt={gift.title || 'Gift'} loading="lazy" />;
+    return <img className={mediaClass} src={imageUrl} alt={gift.title || 'Gift'} loading="lazy" decoding="async" />;
   }
 
   return <span className={mediaClass}><AppIcon name={giftIcon(gift)} /></span>;
@@ -1103,7 +1149,7 @@ function GiftMedia({ gift, compact = false, preferStatic = false }) {
 function CompactCaseRow({ caseItem, gifts, onOpen, busy }) {
   return (
     <div className="compact-case-row">
-      <div className="mini-case-img">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <AppIcon name="box" />}</div>
+      <div className="mini-case-img">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} loading="lazy" decoding="async" /> : <AppIcon name="box" />}</div>
       <div>
         <strong>{caseItem.title}</strong>
         <span>{money(caseItem.price)} so‘m · {gifts.length} sovg‘a</span>
@@ -1326,7 +1372,7 @@ function AdminView(props) {
           <div className="manager-list">
             {cases.map((caseItem) => (
               <div className="admin-item premium-card" key={caseItem.id}>
-                <div className="admin-thumb">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <AppIcon name="box" />}</div>
+                <div className="admin-thumb">{caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} loading="lazy" decoding="async" /> : <AppIcon name="box" />}</div>
                 <div className="admin-item-main">
                   <strong>{caseItem.title}</strong>
                   <span>{formatPrice(caseItem.price)} <AppIcon name="coin" /> · {(giftsByCase[caseItem.id] || []).length} sovg‘a · {caseItem.is_active ? 'Aktiv' : 'Yashirilgan'}</span>
@@ -1600,7 +1646,7 @@ function CaseDetailsModal({ caseItem, gifts, busy, onClose, onOpen }) {
 
         <div className="case-detail-feature">
           <div className="case-detail-thumb">
-            {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} /> : <span><AppIcon name="box" /></span>}
+            {caseItem.image_url ? <img src={caseItem.image_url} alt={caseItem.title} loading="lazy" decoding="async" /> : <span><AppIcon name="box" /></span>}
           </div>
           <div>
             <span className="hot-pill"><AppIcon name="spark" /> HOT</span>
