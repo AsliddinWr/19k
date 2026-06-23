@@ -5019,3 +5019,289 @@ h3,
     height: 38px !important;
   }
 }
+
+/* ==========================================================
+   BOTTOM NAV — PRO DOCK REDESIGN V2
+   Faqat pastki menyu uchun yakuniy override.
+   Oldingi .mobile-nav stillari ustidan ishlaydi.
+   ========================================================== */
+@media (max-width: 900px) {
+  .mobile-nav.premium-card,
+  .mobile-nav {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: 520px !important;
+    margin: 0 auto !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    padding: 9px 10px !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    gap: 5px !important;
+    border-radius: 30px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    z-index: 999 !important;
+
+    background:
+      radial-gradient(circle at 50% -28%, rgba(134, 159, 255, 0.18), transparent 45%),
+      linear-gradient(180deg, rgba(34, 38, 64, 0.99) 0%, rgba(26, 29, 52, 0.995) 56%, rgba(22, 24, 44, 1) 100%) !important;
+    border: 1px solid rgba(189, 202, 255, 0.14) !important;
+    box-shadow:
+      0 22px 48px rgba(0, 0, 0, 0.48),
+      0 8px 22px rgba(0, 0, 0, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+  }
+
+  .mobile-nav::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 4px !important;
+    border-radius: 26px !important;
+    pointer-events: none !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 44%),
+      linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.045), transparent) !important;
+    opacity: 1 !important;
+    z-index: 0 !important;
+  }
+
+  .mobile-nav::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 18px !important;
+    right: 18px !important;
+    bottom: 5px !important;
+    height: 1px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+
+  .mobile-nav-btn {
+    position: relative !important;
+    z-index: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 2px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    color: rgba(207, 216, 244, 0.62) !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease !important;
+  }
+
+  .mobile-nav-btn span {
+    width: 27px !important;
+    height: 24px !important;
+    border-radius: 12px !important;
+    display: grid !important;
+    place-items: center !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: currentColor !important;
+  }
+
+  .mobile-nav-btn span .app-icon,
+  .mobile-nav-btn .app-icon,
+  .mobile-nav-btn svg {
+    width: 21px !important;
+    height: 21px !important;
+    color: currentColor !important;
+    opacity: 1 !important;
+    filter: none !important;
+    stroke-width: 2.25 !important;
+  }
+
+  .mobile-nav-btn strong {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 11.5px !important;
+    line-height: 1 !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.02em !important;
+    color: currentColor !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-btn:not(.center-home):hover,
+  .mobile-nav-btn:not(.center-home).active {
+    color: #ffffff !important;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(120, 211, 255, 0.15), transparent 46%),
+      linear-gradient(180deg, rgba(92, 99, 155, 0.28), rgba(76, 82, 135, 0.14)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 8px 18px rgba(0, 0, 0, 0.14) !important;
+  }
+
+  .mobile-nav-btn:not(.center-home).active::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 6px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 18px !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(90deg, #70e7ff, #8f7cff) !important;
+    box-shadow: 0 0 12px rgba(112, 231, 255, 0.42) !important;
+  }
+
+  /* Center HOME — yangi professional floating chip */
+  .mobile-nav-btn.center-home {
+    width: 76px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    justify-self: center !important;
+    align-self: center !important;
+    transform: translateY(-17px) !important;
+    padding: 0 !important;
+    gap: 5px !important;
+    border-radius: 28px !important;
+    color: #ffffff !important;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.34), transparent 32%),
+      linear-gradient(180deg, #ffe26e 0%, #ffc334 50%, #f5a91b 100%) !important;
+    border: 2px solid rgba(255, 238, 164, 0.92) !important;
+    box-shadow:
+      0 0 0 4px rgba(73, 204, 255, 0.20),
+      0 18px 35px rgba(255, 174, 28, 0.31),
+      0 10px 22px rgba(0, 0, 0, 0.30),
+      inset 0 9px 14px rgba(255, 255, 255, 0.24),
+      inset 0 -8px 14px rgba(150, 82, 0, 0.16) !important;
+  }
+
+  .mobile-nav-btn.center-home::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -5px !important;
+    border-radius: 32px !important;
+    pointer-events: none !important;
+    background:
+      linear-gradient(135deg, rgba(80, 221, 255, 0.90), rgba(124, 92, 255, 0.38), rgba(255, 213, 82, 0.24)) border-box !important;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) padding-box,
+      linear-gradient(#fff 0 0) border-box !important;
+    -webkit-mask-composite: xor !important;
+    mask-composite: exclude !important;
+    border: 2px solid transparent !important;
+    opacity: 0.82 !important;
+    z-index: -1 !important;
+  }
+
+  .mobile-nav-btn.center-home::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: -13px !important;
+    border-radius: 38px !important;
+    pointer-events: none !important;
+    background: radial-gradient(circle, rgba(255, 192, 53, 0.26), transparent 64%) !important;
+    z-index: -2 !important;
+  }
+
+  .mobile-nav-btn.center-home span {
+    width: 36px !important;
+    height: 32px !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, 0.19) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 5px 10px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .mobile-nav-btn.center-home span .app-icon,
+  .mobile-nav-btn.center-home .app-icon,
+  .mobile-nav-btn.center-home svg {
+    width: 23px !important;
+    height: 23px !important;
+    color: #fff !important;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.18)) !important;
+  }
+
+  .mobile-nav-btn.center-home strong {
+    font-size: 12px !important;
+    line-height: 1 !important;
+    font-weight: 950 !important;
+    color: #fff !important;
+    letter-spacing: -0.02em !important;
+    text-shadow: 0 1px 5px rgba(132, 76, 0, 0.26) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-nav.premium-card,
+  .mobile-nav {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 8px 8px !important;
+    border-radius: 26px !important;
+    gap: 3px !important;
+  }
+
+  .mobile-nav-btn {
+    height: 53px !important;
+    min-height: 53px !important;
+    border-radius: 17px !important;
+    gap: 5px !important;
+  }
+
+  .mobile-nav-btn strong {
+    font-size: 10.5px !important;
+  }
+
+  .mobile-nav-btn span .app-icon,
+  .mobile-nav-btn .app-icon,
+  .mobile-nav-btn svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+  .mobile-nav-btn.center-home {
+    width: 70px !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    transform: translateY(-15px) !important;
+    border-radius: 25px !important;
+  }
+
+  .mobile-nav-btn.center-home span {
+    width: 33px !important;
+    height: 30px !important;
+  }
+
+  .mobile-nav-btn.center-home strong {
+    font-size: 11.5px !important;
+  }
+}
